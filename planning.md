@@ -11,24 +11,30 @@ Rules of the game
         ----after playing a card, if you have fewer than 3 cards in your hand AND there are cards left on the deck, draw a card
     -If you can't play a card, you'll collect the discard pile into your hand, the previous player gets to go again
     -you can only play cards from the table face up when your hand is empty
-    -you can only play face down cards when you don't have any face up cards left
+    -you can only play face down cards when you don't have any face up cards left nor cards in your hand
     ---playing facedown cards is always a gamble, you don't get to see them before choosing which one to play. if it's not a valid move, add it to you hand, collect the discard and previous player gets to go again
 Special situations:
     - 2 can be played regardless of the number on top of discard. Then play another card
     - 10 can be played regardles of the number on top of discard AND it will get rid of current discard pile (trashed). Then play a another card
-    - if the top of the discard pile has 4 continuous cards of the same value, the discard pile gets trashed and current player gets another turn.
+    - if the top of the discard pile has 3 continuous cards of the same value, the discard pile gets trashed and current player gets another turn.
 
 Players will be ranked in the order of which they got rid of all the cards
 
 
 
--stretch goal make IA to allow single player
+-
+-stretch goal make AI to allow single player
+-add animations for card movements
+
 ----------------------
+
+
 PseudoCode
 ----------------------
 const completeDeck = []
 let gameDeck =[]
 let discardPile = []
+let cardsInDiscard = 0
 
 class Card{
     suit = 'string'
@@ -36,8 +42,8 @@ class Card{
 }
 
 Define deck()
-    loop 4{
-        loop 12{
+    loop  suit{
+        loop 12 num {
             add new card to completeDeck[]
         }
     }
@@ -108,7 +114,7 @@ changeCurrentPlayer(direction){
     if direction = -1 && currentPlayer is first in the array{
         current player = [length-1]
     }
-    current Player = current player + direction
+    current Player = playerArr[inexOf(current player) + direction]
     display currentPlayer
 }
 
@@ -132,7 +138,7 @@ canPlayCard() {
             } 
         } else return false
     } else if current player has faceup cards{
-        loop hand{
+        loop faceup{
             if isLegalCardPlay{
                 return true
             } 
@@ -161,7 +167,7 @@ playCard(){
 }
 
 
-
+```js
 event listener restricted to currentplayer {
     chosenAction = target.id
     if chosenAction = nolegalmoves{
@@ -181,8 +187,18 @@ event listener restricted to currentplayer {
                 gameOverDisplay()
             }
         }
-        changeCurrentPlayer(+1)
+        changeCurrentPlayer(1)
     }else{
         prompt. not a legal move, choose something else
     }
 }
+
+
+event listener for hovering over cards{
+    highlight card, make it bigger, push it up
+}
+
+event listener ? button explainRules(){
+    display rules div
+}
+```
