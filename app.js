@@ -6,7 +6,7 @@ const suits = ['spades', 'clubs', 'hearts', 'diamonds']
 let playersArr = []
 let finishedPlayers = []
 const legalAmountOfPlayers = ['2','3','4']
-let playerCount = 0
+let playerCount = 4
 
 class Card{
     constructor(suit,num){
@@ -40,10 +40,11 @@ const shuffleDeck = (deck) =>{
     }
 }
 class Player{
-    constructor(hand =[], faceUp =[], faceDown =[]) {
+    constructor(name, hand =[], faceUp =[], faceDown =[]) {
         this.hand = hand
         this.faceUp = faceUp
         this.faceDown = faceDown
+        this.name = name
     }
     done = false;
     position = null;
@@ -58,6 +59,9 @@ class Player{
     }
 }
 
+
+//prompt will repeat until user choses a valid amount of players
+//stretch goal - Include this as a welcome page. Let players have names
 const askPlayerCount = () =>{
     while(legalAmountOfPlayers.includes(playerCount) === false){
         playerCount = prompt('How many players? 2-4 :')
@@ -67,8 +71,18 @@ const askPlayerCount = () =>{
     }
 } 
 
+//will create one object for each player using the 'Player' object class
+const generatePlayers =() => {
+    for (let i = 0; i < playerCount; i++){
+        playersArr[i] = new Player(`player${i+1}`)
+    }
+}
+
+
 defineDeck()
 shuffleDeck(completeDeck)
 // console.log(completeDeck)
-console.log(gameDeck)
+//console.log(gameDeck)
 // askPlayerCount()
+generatePlayers()
+console.log(playersArr[0].name)
