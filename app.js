@@ -78,11 +78,30 @@ const generatePlayers =() => {
     }
 }
 
+const drawCard = (target) =>{
+    let topCard = gameDeck[gameDeck.length-1]
+    gameDeck.pop()
+    target.push(topCard)
+}
+
+const drawInitialCards =() =>{
+    playersArr.forEach(element=>{
+        for (let i = 0; i < 3; i++){
+            drawCard(element.hand)
+            drawCard(element.faceUp)
+            drawCard(element.faceDown)
+        }
+    })
+}
+
+const setUp =() =>{
+    gameDeck = shuffleDeck(completeDeck)
+    drawInitialCards()
+}
 
 defineDeck()
 shuffleDeck(completeDeck)
-// console.log(completeDeck)
-//console.log(gameDeck)
-// askPlayerCount()
 generatePlayers()
-console.log(playersArr[0].name)
+drawInitialCards()
+console.log(playersArr)
+
