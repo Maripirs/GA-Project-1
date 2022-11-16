@@ -77,8 +77,8 @@ body, div{
 }
 
 .discard, .deck{
-    width: 30%;
-    height: 70%;
+    width: 11vh;
+    height: 17vh;
 }
 .tableCenter .card {
     width: 60%;
@@ -103,4 +103,8 @@ body, div{
 }
 .suit, .cardNum{
     margin: 0
+}
+
+h3{
+    margin: 0;
 }

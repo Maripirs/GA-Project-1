@@ -13,10 +13,13 @@ let playerCount = 4
 const currentBoard = document.querySelector('.currentPlayer')
 const inactivePlayers = document.querySelector('.inactivePlayers')
 let playerBoards = []
-
+const deckCards = document.querySelector('.deckCards')
+const discardCards = document.querySelector('.discardCards')
+const passBtn = document.querySelector('.pass')
 ////HTML ELEMENTS
 
 
+//Class for the card object
 class Card{
     constructor(suit,num){
         this.suit = suit
@@ -48,6 +51,8 @@ const shuffleDeck = (deck) =>{
         newDeck.splice(randomIndex,1)
     }
 }
+
+//Class for Player object. Has Name, cards in hand, cards faceUp and cards faceDown. Also tracks whether the player has finished the game and in which position.
 class Player{
     constructor(name, hand =[], faceUp =[], faceDown =[]) {
         this.hand = hand
@@ -87,13 +92,16 @@ const generatePlayers =() => {
     }
 }
 
-const createDiv =(className, content) =>{
-    const newDiv = document.createElement('div')
+//Generic methot to create an element(default DIV) and add conntent to it.
+const createElement =(className, content, tag = 'div') =>{
+    const newDiv = document.createElement(`${tag}`)
     newDiv.className = className;
     newDiv.textContent= content
     return newDiv
 }
 
+//Creates one board div for each player. Each one containing 3 divs (hand, faceup, facedown).
+//First Player gets appended to current board and the rest to inactive boards 
 const displayPlayerBoards =() =>{
     for (let i = 0; i < playersArr.length; i++){
         playerBoards[i] = document.createElement('div')
@@ -106,41 +114,50 @@ const displayPlayerBoards =() =>{
             inactivePlayers.appendChild(playerBoards[i])
             playerBoards[i].setAttribute('id', `player${i+1}`)
         }
-        playerBoards[i].appendChild(createDiv('hand'))
-        playerBoards[i].appendChild(createDiv('faceUpRow'))
-        playerBoards[i].appendChild(createDiv('faceDownRow' ))
+        playerBoards[i].appendChild(createElement('hand'))
+        playerBoards[i].appendChild(createElement('faceUpRow'))
+        playerBoards[i].appendChild(createElement('faceDownRow' ))
     }
 }
 
 
-//takes two parameters, player property and player Index
+//takes two parameters, player index, player property and the class of the card(faceUp or faceDown)
 //i.e drawCard(1, hand) will draw a card into the hand of the player in index 1
-const drawCard = (playerInd, playerProperty, className) =>{
+//affects both the array and the display
+const drawCard = (playerInd, playerProperty, className, setup = false) =>{
     let topCard = gameDeck[gameDeck.length-1]
     gameDeck.pop()
     playersArr[playerInd][playerProperty].push(topCard)
 
     displayCard(playerInd, className, playerProperty, topCard.num, topCard.suit)
+    //Only display cards in deck after setup
+    if(setup === false){
+        deckCards.textContent = (gameDeck.length).toString()
+    }
+
 }
 
 
 
-
+//Gives each player 3 cards in each of their areas
 const drawInitialCards =() =>{
     for (let i = 0; i < playersArr.length; i++){
         for (let j = 0; j < 3; j++){
-            drawCard(i, 'faceUp','hand' )
-            drawCard(i, 'faceUp','faceUpRow')
-            drawCard(i, 'faceDown','faceDownRow')
+            drawCard(i, 'faceUp','hand', true )
+            drawCard(i, 'faceUp','faceUpRow', true)
+            drawCard(i, 'faceDown','faceDownRow', true)
         }
     }
+    deckCards.textContent = (gameDeck.length).toString()
 }
 
+// shuffles the deck and then draws starting cards
 const setUp =() =>{
     gameDeck = shuffleDeck(completeDeck)
     drawInitialCards()
 }
 
+// Simple function to replace the display number for a letter in case of a facecard
 const faceCard =(num) =>{
     if (num === 14) {
         return 'A'
@@ -155,16 +172,11 @@ const faceCard =(num) =>{
 
 }
 
-
+//Creates the divs elements for the card and contents of the cars, then appends it to the player and class targeted
 const displayCard = (playerInd, className, orientation = faceUp, num, suit) =>{
 
-    let card = document.createElement(`div`)
-    card.className = `card ${orientation}`
-
-    let cardNum = document.createElement('h3')
-    cardNum.className = 'cardNum'
-    cardNum.textContent = faceCard(num)
-
+    let card = createElement(`card ${orientation}`)
+    let cardNum = createElement('cardNum',num, 'h3')
     let cardSuit = document.createElement('h3')
     cardSuit.className = 'suit'
     cardSuit.innerHTML = suit
@@ -174,44 +186,60 @@ const displayCard = (playerInd, className, orientation = faceUp, num, suit) =>{
     }
     card.appendChild(cardNum)
     card.appendChild(cardSuit)
-    console.log(playerBoards[playerInd])
-    console.log(className)
 
     const board = playerBoards[playerInd].querySelector(`.${className}`)
-    if(board === undefined || board === null){
-        console.log("unknown board")
-    } else{
-      board.appendChild(card)
-    }
+    board.appendChild(card)
+
 
 }
-
+//cycles through the players according to the direction (forwards or backwards)
 const changeCurrentPlayer =(direction) =>{
+    let prevPlayerInd = playersArr.indexOf(currentPlayer)
+    let inactivePlayersInd = []
+
     if ((direction === 1) && (currentPlayer === playersArr[playersArr.length-1])){
         currentPlayer = playersArr[0]
+
     }else if ((direction === -1) && (currentPlayer === playersArr[0])){
         currentPlayer = playersArr[playersArr.length-1]
     } else{
         currentPlayer = playersArr[playersArr.indexOf(currentPlayer) + direction]
     }
+    displayCurrentPlayer(prevPlayerInd)
+    if (direction == 1){
+        inactivePlayers.appendChild(playerBoards[prevPlayerInd])
+    }else {
+        inactivePlayers.prepend(playerBoards[prevPlayerInd])
+    }
 }
 
-const displayCurrentPlayer = () =>{
 
+
+// replaces the current player board with the new current player
+const displayCurrentPlayer = (prevPlayerInd) =>{
+    let currentPlayerInd = playersArr.indexOf(currentPlayer);
+    currentBoard.replaceChild(playerBoards[currentPlayerInd], playerBoards[prevPlayerInd])
 }
+// element.replaceChild((currentBoard.children[0]), playerBoards[1])
 
+
+
+
+
+//This function should play a turn. currently is only swapping current player
 currentBoard.addEventListener('click', function(e){
-    console.log(e.target)
-    changeCurrentPlayer(1)
-    console.log(currentPlayer.name)
+    let selectedCardValue = e.target.closest('.card').children[0].textContent
+
+    console.log(selectedCard)
 })
 
 defineDeck()
 shuffleDeck(completeDeck)
-console.log(gameDeck)
+
 generatePlayers()
 let currentPlayer = playersArr[0]
+
 displayPlayerBoards()
 
 drawInitialCards()
-console.log(playersArr)
+
