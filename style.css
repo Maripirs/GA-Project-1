@@ -1,0 +1,66 @@
+body{
+    margin: 1vh;
+}
+body, div{
+    display:flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+}
+.card{
+    height: 4vh;
+    width: 3vh;
+    border-radius: 1vh;
+    margin: 0 1vh;
+    border: rgb(215, 215, 215) .3vh solid;
+}
+.faceUp{
+    background-color: white;
+    flex-direction: row;
+}
+
+.faceDown{
+    background-color: grey;
+}
+.header{
+    background-color: aqua;
+    height: 5vh;
+    width: 100%;
+    display: flex;
+
+}
+.inactivePlayers{
+    background-color: aquamarine;
+    height:27vh;
+    width: 100%;
+    border: 1px solid black;
+    flex-direction: row;
+}
+.tableCenter{
+    background-color: aquamarine;
+    height:30vh;
+    width: 100%;
+    border: 1px solid black;
+    flex-direction: row;
+}
+.currentPlayer{
+    background-color: aquamarine;
+    height:35vh;
+    width: 100%;
+    border: 1px solid black
+}
+.playerBoard{
+    height: 50%;
+    width: 50%;
+    background-color: blueviolet;
+    justify-content: space-around;
+    border: 1px solid black;
+}
+.currentBoard{
+    width: 80vw;
+    height: 30vh;
+}
+.hand, .faceDownRow, .faceUpRow {
+    flex-direction: row;
+    background-color: blue;
+}

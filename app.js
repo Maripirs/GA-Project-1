@@ -2,11 +2,20 @@ const completeDeck = []
 let gameDeck =[]
 let discardPile = []
 let cardsInDiscard = 0
-const suits = ['spades', 'clubs', 'hearts', 'diamonds']
+const suits = ['&#9824', '&#9670', '&#9827', '&#9829']
 let playersArr = []
 let finishedPlayers = []
 const legalAmountOfPlayers = ['2','3','4']
 let playerCount = 4
+
+
+////HTML ELEMENTS
+const currentBoard = document.querySelector('.currentBoard')
+const inactivePlayers = document.querySelector('.inactivePlayers')
+let playerBoards = []
+
+////HTML ELEMENTS
+
 
 class Card{
     constructor(suit,num){
@@ -78,20 +87,51 @@ const generatePlayers =() => {
     }
 }
 
-const drawCard = (target) =>{
-    let topCard = gameDeck[gameDeck.length-1]
-    gameDeck.pop()
-    target.push(topCard)
+const createDiv =(className, content) =>{
+    const newDiv = document.createElement('div')
+    newDiv.className = className;
+    newDiv.textContent= content
+    return newDiv
 }
 
-const drawInitialCards =() =>{
-    playersArr.forEach(element=>{
-        for (let i = 0; i < 3; i++){
-            drawCard(element.hand)
-            drawCard(element.faceUp)
-            drawCard(element.faceDown)
+const displayPlayerBoards =() =>{
+    for (let i = 0; i < playersArr.length; i++){
+        playerBoards[i] = document.createElement('div')
+        if (i === 0){
+            playerBoards[i].className = 'playerBoard currentBoard'
+            currentBoard.appendChild(playerBoards[i])
+        }else{
+            playerBoards[i].className = 'playerBoard'
+            inactivePlayers.appendChild(playerBoards[i])
         }
-    })
+        playerBoards[i].appendChild(createDiv('hand'))
+        playerBoards[i].appendChild(createDiv('faceUpRow'))
+        playerBoards[i].appendChild(createDiv('faceDownRow' ))
+    }
+}
+
+
+//takes two parameters, player property and player Index
+//i.e drawCard(1, hand) will draw a card into the hand of the player in index 1
+const drawCard = (playerInd, playerProperty, className) =>{
+    let topCard = gameDeck[gameDeck.length-1]
+    gameDeck.pop()
+    playersArr[playerInd][playerProperty].push(topCard)
+
+    displayCard(playerInd, className, playerProperty, topCard.num, topCard.suit)
+}
+
+
+
+
+const drawInitialCards =() =>{
+    for (let i = 0; i < playersArr.length; i++){
+        for (let j = 0; j < 3; j++){
+            drawCard(i, 'faceUp','hand' )
+            drawCard(i, 'faceUp','faceUpRow')
+            drawCard(i, 'faceDown','faceDownRow')
+        }
+    }
 }
 
 const setUp =() =>{
@@ -99,9 +139,71 @@ const setUp =() =>{
     drawInitialCards()
 }
 
+const faceCard =(num) =>{
+    if (num === 14) {
+        return 'A'
+    } else if (num === 13){
+        return 'K'
+    } else if(num ===12){
+        return 'Q'
+    } else if (num ===11){
+        return 'J'
+    } else return num
+
+
+}
+
+
+const displayCard = (playerInd, className, orientation = faceUp, num, suit) =>{
+
+    let card = document.createElement(`div`)
+    card.className = `card ${orientation}`
+
+    let cardNum = document.createElement('h3')
+    cardNum.className = 'cardNum'
+    cardNum.textContent = faceCard(num)
+
+    let cardSuit = document.createElement('h3')
+    cardSuit.className = 'suit'
+    cardSuit.innerHTML = suit
+    if (orientation === 'faceUp'){
+        card.appendChild(cardNum)
+        card.appendChild(cardSuit)
+    }
+    console.log(playerBoards[playerInd])
+    console.log(className)
+
+    const board = playerBoards[playerInd].querySelector(`.${className}`)
+    if(board === undefined || board === null){
+        console.log("unknown board")
+    } else{
+      board.appendChild(card)
+    }
+
+}
+
+const changeCurrentPlayer =(direction) =>{
+    if ((direction === 1) && (currentPlayer === playersArr[playersArr.length-1])){
+        currentPlayer = playersArr[0]
+    }else if ((direction === -1) && (currentPlayer === playersArr[0])){
+        currentPlayer = playersArr[playersArr.length-1]
+    } else{
+        currentPlayer = playersArr[playersArr.indexOf(currentPlayer) + direction]
+    }
+}
+
+
+currentBoard.addEventListener('click', function(e){
+    console.log(e.target)
+    changeCurrentPlayer(1)
+    console.log(currentPlayer.name)
+})
+
 defineDeck()
 shuffleDeck(completeDeck)
 generatePlayers()
+let currentPlayer = playersArr[0]
+displayPlayerBoards()
 drawInitialCards()
 console.log(playersArr)
 
