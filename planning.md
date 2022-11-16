@@ -202,3 +202,35 @@ event listener ? button explainRules(){
     display rules div
 }
 ```
+
+
+
+
+ <div class = 'playerBoard currentBoard'>
+            <!-- <div class = 'hand'> 
+                <div class = 'card faceUp'>
+                    <h3 class = 'cardNum'>7</h3>
+                    <h3 class = 'suit'> &#9824;</h3>
+                </div>
+                <div class = 'card faceUp'>
+                    <h3 class = 'cardNum'>13</h3>
+                    <h3 class = 'suit'> &#9670;</h3>
+                </div>
+                <div class = 'card faceUp'>
+                    <h3 class = 'cardNum'>4</h3>
+                    <h3 class = 'suit'> &#9827;</h3>
+                </div>
+                <div class = 'card faceUp'>
+                    <h3 class = 'cardNum'>A</h3>
+                    <h3 class = 'suit'> &#9829;</h3>
+                </div>
+                
+            </div>
+            <div class = 'faceUpRow'>
+                <div class = 'card faceUp diamonds'></div>
+            </div>
+            <div class = 'faceDownRow'>
+                <div class = 'card faceDown'></div>
+            </div> -->
+            <button class ='pass'>Pass</button>
+        </div>

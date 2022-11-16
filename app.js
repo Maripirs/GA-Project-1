@@ -2,7 +2,7 @@ const completeDeck = []
 let gameDeck =[]
 let discardPile = []
 let cardsInDiscard = 0
-const suits = ['&#9824', '&#9670', '&#9827', '&#9829']
+const suits = ['&#9824', '&#9830', '&#9827', '&#9829']
 let playersArr = []
 let finishedPlayers = []
 const legalAmountOfPlayers = ['2','3','4']
@@ -10,7 +10,7 @@ let playerCount = 4
 
 
 ////HTML ELEMENTS
-const currentBoard = document.querySelector('.currentBoard')
+const currentBoard = document.querySelector('.currentPlayer')
 const inactivePlayers = document.querySelector('.inactivePlayers')
 let playerBoards = []
 
@@ -43,7 +43,7 @@ const defineDeck =() =>{
 const shuffleDeck = (deck) =>{
     newDeck = [...deck]
     while (newDeck.length >0){
-        let randomIndex= randomNum(0,newDeck.length-1)
+        let randomIndex= randomNum(0,newDeck.length)
         gameDeck.push(newDeck[randomIndex]);
         newDeck.splice(randomIndex,1)
     }
@@ -98,11 +98,13 @@ const displayPlayerBoards =() =>{
     for (let i = 0; i < playersArr.length; i++){
         playerBoards[i] = document.createElement('div')
         if (i === 0){
-            playerBoards[i].className = 'playerBoard currentBoard'
+            playerBoards[i].className = 'playerBoard'
+            playerBoards[i].setAttribute('id', 'player1')
             currentBoard.appendChild(playerBoards[i])
         }else{
             playerBoards[i].className = 'playerBoard'
             inactivePlayers.appendChild(playerBoards[i])
+            playerBoards[i].setAttribute('id', `player${i+1}`)
         }
         playerBoards[i].appendChild(createDiv('hand'))
         playerBoards[i].appendChild(createDiv('faceUpRow'))
@@ -166,10 +168,12 @@ const displayCard = (playerInd, className, orientation = faceUp, num, suit) =>{
     let cardSuit = document.createElement('h3')
     cardSuit.className = 'suit'
     cardSuit.innerHTML = suit
-    if (orientation === 'faceUp'){
-        card.appendChild(cardNum)
-        card.appendChild(cardSuit)
+    if (orientation === 'faceDown'){
+        cardSuit.className = 'suit hid'
+        cardNum.className = 'cardNum hid'
     }
+    card.appendChild(cardNum)
+    card.appendChild(cardSuit)
     console.log(playerBoards[playerInd])
     console.log(className)
 
@@ -192,6 +196,9 @@ const changeCurrentPlayer =(direction) =>{
     }
 }
 
+const displayCurrentPlayer = () =>{
+
+}
 
 currentBoard.addEventListener('click', function(e){
     console.log(e.target)
@@ -201,9 +208,10 @@ currentBoard.addEventListener('click', function(e){
 
 defineDeck()
 shuffleDeck(completeDeck)
+console.log(gameDeck)
 generatePlayers()
 let currentPlayer = playersArr[0]
 displayPlayerBoards()
+
 drawInitialCards()
 console.log(playersArr)
-
