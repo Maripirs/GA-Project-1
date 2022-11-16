@@ -108,3 +108,6 @@ body, div{
 h3{
     margin: 0;
 }
+.hand .card{
+    background-color: pink;
+}

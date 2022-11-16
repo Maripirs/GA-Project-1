@@ -128,8 +128,8 @@ const drawCard = (playerInd, playerProperty, className, setup = false) =>{
     let topCard = gameDeck[gameDeck.length-1]
     gameDeck.pop()
     playersArr[playerInd][playerProperty].push(topCard)
-
-    displayCard(playerInd, className, playerProperty, topCard.num, topCard.suit)
+    
+    displayCard(playerInd, className, playerProperty ,topCard.num, topCard.suit)
     //Only display cards in deck after setup
     if(setup === false){
         deckCards.textContent = (gameDeck.length).toString()
@@ -143,12 +143,13 @@ const drawCard = (playerInd, playerProperty, className, setup = false) =>{
 const drawInitialCards =() =>{
     for (let i = 0; i < playersArr.length; i++){
         for (let j = 0; j < 3; j++){
-            drawCard(i, 'faceUp','hand', true )
+            drawCard(i, 'hand','hand', true )
             drawCard(i, 'faceUp','faceUpRow', true)
             drawCard(i, 'faceDown','faceDownRow', true)
         }
     }
     deckCards.textContent = (gameDeck.length).toString()
+    console.log(playersArr)
 }
 
 // shuffles the deck and then draws starting cards
@@ -220,18 +221,77 @@ const displayCurrentPlayer = (prevPlayerInd) =>{
     let currentPlayerInd = playersArr.indexOf(currentPlayer);
     currentBoard.replaceChild(playerBoards[currentPlayerInd], playerBoards[prevPlayerInd])
 }
-// element.replaceChild((currentBoard.children[0]), playerBoards[1])
+
+//checks if the selected card can be added to the discard pile
+const isLegalCardPlay = (selectedCardValue) =>{
+    if (discardPile.length === 0){
+        return true
+    }
+    let topDiscard = discardPile[discardPile.length-1]
+    
+    if (selectedCardValue >= topDiscard){
+        return true
+    } else if (selectedCardValue === 2) {
+        return true
+    } else if (selectedCardValue === 10) {
+        return true
+    }
+}
+
+const canPlayCard = () => {
+    //if player has cards in hand that can be played, return true.
+    if (currentPlayer.hand.length != 0) {
+        for (let i = 0; i >currentPlayer.hand.length; i++){
+            if (isLegalCardPlay(currentPlayer.hand[i]) === true) {
+                return true
+            } 
+        } 
+        return false
+    //if player has no cards in hand, but has faceUp cards that can be played, return true.
+    } else if (currentPlayer.faceUp.length != 0){
+        for (let i = 0; i >currentPlayer.faceUp.length; i++){
+            if (isLegalCardPlay(currentPlayer.faceUp[i]) === true) {
+                return true
+            } 
+        } return false
+    }
+    return true
+}
+
+//looks for matching cards on top of the discard pile
+const checkForSet = () =>{
+    if (discardPile.length >= 3) {
+        if (discardPile[discardPile.length-1] === discardPile[discardPile.length-2] &&
+            discardPile[discardPile.length-1] === discardPile[discardPile.length-3]){
+                return true
+        }
+    }
+}
+
+const playCard = (selectedCardValue,source , chosenCardObj) =>{
+    // I'll deal with duplicates later
+    // if have duplicate prompt want to play both? = y{
+    //     add both to discard array
+    // }
+    discardPile.push(chosenCardObj)
+    curr
+
+
+    if (checkForSet() || chosencard === 10){
+        discardPile = []
+        //remove cards from display discard pile
+    }
+}
 
 
 
+const passAttempt = () =>{
+    changeCurrentPlayer(-1)
+    console.log('pass')
+}
+// will check if passing is a legal move.
+//if it is, current player will pick up discardPile, and the previous player goes again
 
-
-//This function should play a turn. currently is only swapping current player
-currentBoard.addEventListener('click', function(e){
-    let selectedCardValue = e.target.closest('.card').children[0].textContent
-
-    console.log(selectedCard)
-})
 
 defineDeck()
 shuffleDeck(completeDeck)
@@ -242,4 +302,22 @@ let currentPlayer = playersArr[0]
 displayPlayerBoards()
 
 drawInitialCards()
+
+
+/*
+Event Listeners past this line
+-----------------------------------------
+*/
+
+
+
+passBtn.addEventListener('click', passAttempt)
+
+//This function should play a turn. currently is only swapping current player
+currentBoard.addEventListener('click', function(e){
+    let selectedCardValue = e.target.closest('.card').children[0].textContent
+    changeCurrentPlayer(1)
+    console.log(selectedCardValue)
+})
+
 
