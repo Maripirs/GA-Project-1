@@ -222,10 +222,8 @@ const displayCurrentPlayer = (prevPlayerInd) =>{
     currentBoard.replaceChild(playerBoards[currentPlayerInd], playerBoards[prevPlayerInd])
 }
 
-//checks if the selected card can be added to the discard pile
-const isLegalCardPlay = (selectedCardValue, source) =>{
-    if (currentPlayer.hand.length != 0  && source != 'hand') {
-        let topDiscard = discardPile[discardPile.length-1]
+const compareCardValue =(selectedCardValue) =>{
+    let topDiscard = discardPile[discardPile.length-1]
         if (discardPile.length === 0){
             return true
         } else if (selectedCardValue >= topDiscard.num){
@@ -236,20 +234,27 @@ const isLegalCardPlay = (selectedCardValue, source) =>{
             return true
         }
         return false
-    }
-    if (currentPlayer.faceUp.length != 0  && source === 'faceDown'){
-        return true
-    }
+}
 
-    let topDiscard = discardPile[discardPile.length-1]
-    if (discardPile.length === 0){
-        return true
-    } else if (selectedCardValue >= topDiscard.num){
-        return true
-    } else if (selectedCardValue === 2) {
-        return true
-    } else if (selectedCardValue === 10) {
-        return true
+
+//checks if the selected card can be added to the discard pile
+const isLegalCardPlay = (selectedCardValue, source) =>{
+
+    if (currentPlayer.hand.length != 0) {
+        if(source != 'hand'){
+            console.log('Player tried to play card not in hand when having cards in hand')
+            return false
+        }else {
+            return compareCardValue(selectedCardValue)
+        }
+
+    } else if (currentPlayer.faceUp.length != 0){
+        if(source != 'faceUp'){
+            console.log('Player tried to play faceDown card when having cards faceUp')
+            return false
+        }else {
+            return compareCardValue(selectedCardValue)
+        }
     }
 }
 
@@ -283,6 +288,8 @@ const checkForSet = () =>{
     }
 }
 
+//makes content on discardpile visible
+//redefines content of discardPile to match the arguments
 const displayOnDiscard = (displayNum, suit) =>{
     document.querySelector('.discardPile .cardNum').style.visibility = 'visible' 
     document.querySelector('.discardPile .suit').style.visibility = 'visible' 
@@ -291,6 +298,9 @@ const displayOnDiscard = (displayNum, suit) =>{
     document.querySelector('.discardPile .suit').textContent = suit
 }
 
+
+
+// loops through the cards of the player looking for the chosen one. returns the index
 const determineCardIndex =(chosenDisplayNum, chosenSuit, source) =>{
     
     // console.log(currentPlayer[source].length, 'length')
@@ -300,10 +310,6 @@ const determineCardIndex =(chosenDisplayNum, chosenSuit, source) =>{
 
     let cardIndex = 0
     for (let i = 0; i < currentPlayer[source].length; i++){
-        console.log( currentPlayer[source][i].displayNum, 'compare display num')
-        console.log( chosenDisplayNum, 'chosen display num')
-        console.log( currentPlayer[source][i].suit, 'compare display suit')
-        console.log( chosenSuit, 'chosen display suit')
         if (currentPlayer[source][i].displayNum === chosenDisplayNum && currentPlayer[source][i].suit === chosenSuit){
             cardIndex = i
             return cardIndex
@@ -311,12 +317,17 @@ const determineCardIndex =(chosenDisplayNum, chosenSuit, source) =>{
     }
 }
 
+//should set the discards visibility to invisible. not working
 clearDiscardDisplay =() =>{
     document.querySelector('.discardPile .cardNum').style.visibility = 'invisible' 
     document.querySelector('.discardPile .suit').style.visibility = 'invisible' 
 }
 
 
+
+//adds the card to discard both in the array and display
+//removes it from the player both in the array and display
+//if conditions are met. clears discard
 const playCard = (cardInd, source, num, suit, displayNum) =>{
     // I'll deal with duplicates later
     // if have duplicate prompt want to play both? = y{
@@ -328,6 +339,9 @@ const playCard = (cardInd, source, num, suit, displayNum) =>{
     discardPile.push(currentPlayer[source][cardInd])
 
     currentPlayer[source].splice(cardInd, 1)
+    if (gameDeck.length > 0){
+        drawCard(playersArr.indexOf(currentPlayer), 'hand','hand')
+    }
 
     if (checkForSet() || num === 10){
         discardPile = []
@@ -338,7 +352,9 @@ const playCard = (cardInd, source, num, suit, displayNum) =>{
 }
 
 
-
+//checks if the player can play. if they can, they're not allowed to pass
+//if they can pass. they'll add the discard to their hand both in array and display
+//previous player goes again
 const passAttempt = () =>{
     if (canPlayCard()){
         console.log('please pick a card')
@@ -346,11 +362,12 @@ const passAttempt = () =>{
         currentPlayer.hand.push(...discardPile)
         let playerInd = playersArr.indexOf(currentPlayer) 
         discardPile.forEach((card) =>{
-            displayCard(playerInd, 'hand', 'faceUp', card.displayNum, card.suit)
+            displayCard(playerInd, 'hand', 'hand', card.displayNum, card.suit)
         })
         discardPile = []
         clearDiscardDisplay()
         changeCurrentPlayer(-1)
+        discardCards.textContent = discardPile.length.toString()
         console.log('pass')
     }
 }
@@ -385,11 +402,9 @@ currentBoard.addEventListener('click', function(e){
     let selectedCardDisplayNum = e.target.closest('.card').children[0].textContent
     let selectedCardSource = e.target.closest('div').className.split(' ')[1]
     let cardInd = determineCardIndex(selectedCardDisplayNum,selectedCardSuit, selectedCardSource)
-    console.log(cardInd)
-    console.log(currentPlayer[selectedCardSource][cardInd])
     let selectedCardNum = currentPlayer[selectedCardSource][cardInd].num
     console.log(selectedCardNum)
-    if (isLegalCardPlay(selectedCardNum)){
+    if (isLegalCardPlay(selectedCardNum, selectedCardSource)){
         playCard(cardInd, selectedCardSource,selectedCardNum, selectedCardSuit, selectedCardDisplayNum)
         e.target.closest('.card').remove()
         currentPlayer.doneWithGame()
