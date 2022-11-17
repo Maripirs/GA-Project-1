@@ -2,7 +2,7 @@ const completeDeck = []
 let gameDeck =[]
 let discardPile = []
 let cardsInDiscard = 0
-const suits = ['&#9824', '&#9830', '&#9827', '&#9829']
+const suits = ['♠', '♣', '♦', '♥']
 let playersArr = []
 let finishedPlayers = []
 const legalAmountOfPlayers = ['2','3','4']
@@ -16,6 +16,7 @@ let playerBoards = []
 const deckCards = document.querySelector('.deckCards')
 const discardCards = document.querySelector('.discardCards')
 const passBtn = document.querySelector('.pass')
+// const handDisplay = document.querySelectorAll('.currentPlayer .hand')
 ////HTML ELEMENTS
 
 
@@ -44,11 +45,11 @@ const defineDeck =() =>{
 
 // adds the elements from the deck array into a shuffled array in random order
 const shuffleDeck = (deck) =>{
-    newDeck = [...deck]
-    while (newDeck.length >0){
-        let randomIndex= randomNum(0,newDeck.length)
-        gameDeck.push(newDeck[randomIndex]);
-        newDeck.splice(randomIndex,1)
+    oldDeck = [...deck]
+    while (oldDeck.length >0){
+        let randomIndex= randomNum(0,oldDeck.length)
+        gameDeck.push(oldDeck[randomIndex]);
+        oldDeck.splice(randomIndex,1)
     }
 }
 
@@ -96,7 +97,7 @@ const generatePlayers =() => {
 const createElement =(className, content, tag = 'div') =>{
     const newDiv = document.createElement(`${tag}`)
     newDiv.className = className;
-    newDiv.textContent= content
+    newDiv.textContent= content;
     return newDiv
 }
 
@@ -124,7 +125,7 @@ const displayPlayerBoards =() =>{
 //takes two parameters, player index, player property and the class of the card(faceUp or faceDown)
 //i.e drawCard(1, hand) will draw a card into the hand of the player in index 1
 //affects both the array and the display
-const drawCard = (playerInd, playerProperty, className, setup = false) =>{
+const drawCard = (playerInd, playerProperty = 'hand', className ='hand', setup = false) =>{
     let topCard = gameDeck[gameDeck.length-1]
     gameDeck.pop()
     playersArr[playerInd][playerProperty].push(topCard)
@@ -149,7 +150,7 @@ const drawInitialCards =() =>{
         }
     }
     deckCards.textContent = (gameDeck.length).toString()
-    console.log(playersArr)
+
 }
 
 // shuffles the deck and then draws starting cards
@@ -196,7 +197,6 @@ const displayCard = (playerInd, className, orientation = faceUp, num, suit) =>{
 //cycles through the players according to the direction (forwards or backwards)
 const changeCurrentPlayer =(direction) =>{
     let prevPlayerInd = playersArr.indexOf(currentPlayer)
-    let inactivePlayersInd = []
 
     if ((direction === 1) && (currentPlayer === playersArr[playersArr.length-1])){
         currentPlayer = playersArr[0]
@@ -206,6 +206,7 @@ const changeCurrentPlayer =(direction) =>{
     } else{
         currentPlayer = playersArr[playersArr.indexOf(currentPlayer) + direction]
     }
+
     displayCurrentPlayer(prevPlayerInd)
     if (direction == 1){
         inactivePlayers.appendChild(playerBoards[prevPlayerInd])
@@ -268,16 +269,34 @@ const checkForSet = () =>{
     }
 }
 
-const playCard = (selectedCardValue,source , chosenCardObj) =>{
+const displayOnDiscard = (num, suit) =>{
+    document.querySelector('.discardPile .cardNum').style.visibility = 'visible' 
+    document.querySelector('.discardPile .suit').style.visibility = 'visible' 
+
+    document.querySelector('.discardPile .cardNum').textContent = num
+    document.querySelector('.discardPile .suit').textContent = suit
+}
+
+const playCard = (chosenNum, chosenSuit, source) =>{
     // I'll deal with duplicates later
     // if have duplicate prompt want to play both? = y{
     //     add both to discard array
     // }
-    discardPile.push(chosenCardObj)
-    curr
+    let cardIndex = 0
+    for (let i = 0; i < currentPlayer[source].length; i++){
+        if (currentPlayer[source][i].num.toString() === chosenNum.toString() && currentPlayer[source][i].suit === chosenSuit){
+           cardIndex = i
+           break
+        }
+    }
+    // discardPile.push(currentPlayer.source[0])
+
+    displayOnDiscard(chosenNum, chosenSuit)
+    const handDisplay = document.querySelectorAll('.currentPlayer .hand')
 
 
-    if (checkForSet() || chosencard === 10){
+
+    if (checkForSet() || chosenNum === 10){
         discardPile = []
         //remove cards from display discard pile
     }
@@ -315,9 +334,26 @@ passBtn.addEventListener('click', passAttempt)
 
 //This function should play a turn. currently is only swapping current player
 currentBoard.addEventListener('click', function(e){
-    let selectedCardValue = e.target.closest('.card').children[0].textContent
-    changeCurrentPlayer(1)
-    console.log(selectedCardValue)
+    console.log(e.target)
+    let selectedCardNum = e.target.closest('.card').children[0].textContent
+    let selectedCardSuit = e.target.closest('.card').children[1].textContent
+    let selectedCardSource = e.target.closest('div').className.split(' ')[1]
+    
+    if (isLegalCardPlay(selectedCardNum)){
+        playCard(selectedCardNum,selectedCardSuit, selectedCardSource)
+        changeCurrentPlayer(1)
+        e.target.closest('.card').remove()
+        currentPlayer.doneWithGame()
+        if (currentPlayer.done){
+            finishedPlayers.push(currentPlayer)
+            playersArr.splice(playersArr.indexOf(currentPlayer, 1))
+            if (playersArr.length === 0){
+                console.log(gameOver)
+            }
+        }
+    
+    }
+    if (selectedCardSource === faceDown){
 })
 
 
