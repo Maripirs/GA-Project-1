@@ -16,15 +16,17 @@ let playerBoards = []
 const deckCards = document.querySelector('.deckCards')
 const discardCards = document.querySelector('.discardCards')
 const passBtn = document.querySelector('.pass')
+
 // const handDisplay = document.querySelectorAll('.currentPlayer .hand')
 ////HTML ELEMENTS
 
 
 //Class for the card object
 class Card{
-    constructor(suit,num){
+    constructor(suit,num, displayNum){
         this.suit = suit
         this.num = num
+        this.displayNum = displayNum
     }
 }
 
@@ -37,7 +39,18 @@ const randomNum = (min, max) => {
 const defineDeck =() =>{
     for (let i = 0; i < suits.length; i++){
         for(let j = 0; j<13; j++){
-            let newCard = new Card (suits[i], j+2)
+            let newCard = new Card (suits[i], j+2, j+2)
+            if (newCard.num === 14) {
+                newCard.displayNum = 'A'
+            } else if (newCard.num === 13){
+                newCard.displayNum = 'K'
+            } else if(newCard.num ===12){
+                newCard.displayNum = 'Q'
+            } else if (newCard.num ===11){
+                newCard.displayNum = 'J'
+            } else {
+                newCard.displayNum = "" +  newCard.num
+            }
             completeDeck.push(newCard)
         }
     }
@@ -55,7 +68,7 @@ const shuffleDeck = (deck) =>{
 
 //Class for Player object. Has Name, cards in hand, cards faceUp and cards faceDown. Also tracks whether the player has finished the game and in which position.
 class Player{
-    constructor(name, hand =[], faceUp =[], faceDown =[]) {
+    constructor(name, hand =[], faceUp =[], faceDown =[], displayNum) {
         this.hand = hand
         this.faceUp = faceUp
         this.faceDown = faceDown
@@ -130,7 +143,7 @@ const drawCard = (playerInd, playerProperty = 'hand', className ='hand', setup =
     gameDeck.pop()
     playersArr[playerInd][playerProperty].push(topCard)
     
-    displayCard(playerInd, className, playerProperty ,topCard.num, topCard.suit)
+    displayCard(playerInd, className, playerProperty ,topCard.displayNum, topCard.suit)
     //Only display cards in deck after setup
     if(setup === false){
         deckCards.textContent = (gameDeck.length).toString()
@@ -159,26 +172,12 @@ const setUp =() =>{
     drawInitialCards()
 }
 
-// Simple function to replace the display number for a letter in case of a facecard
-const faceCard =(num) =>{
-    if (num === 14) {
-        return 'A'
-    } else if (num === 13){
-        return 'K'
-    } else if(num ===12){
-        return 'Q'
-    } else if (num ===11){
-        return 'J'
-    } else return num
-
-
-}
 
 //Creates the divs elements for the card and contents of the cars, then appends it to the player and class targeted
-const displayCard = (playerInd, className, orientation = faceUp, num, suit) =>{
+const displayCard = (playerInd, className, orientation = faceUp, displayNum, suit) =>{
 
     let card = createElement(`card ${orientation}`)
-    let cardNum = createElement('cardNum',num, 'h3')
+    let cardNum = createElement('cardNum',displayNum, 'h3')
     let cardSuit = document.createElement('h3')
     cardSuit.className = 'suit'
     cardSuit.innerHTML = suit
@@ -224,13 +223,28 @@ const displayCurrentPlayer = (prevPlayerInd) =>{
 }
 
 //checks if the selected card can be added to the discard pile
-const isLegalCardPlay = (selectedCardValue) =>{
-    if (discardPile.length === 0){
+const isLegalCardPlay = (selectedCardValue, source) =>{
+    if (currentPlayer.hand.length != 0  && source != 'hand') {
+        let topDiscard = discardPile[discardPile.length-1]
+        if (discardPile.length === 0){
+            return true
+        } else if (selectedCardValue >= topDiscard.num){
+            return true
+        } else if (selectedCardValue === 2) {
+            return true
+        } else if (selectedCardValue === 10) {
+            return true
+        }
+        return false
+    }
+    if (currentPlayer.faceUp.length != 0  && source === 'faceDown'){
         return true
     }
+
     let topDiscard = discardPile[discardPile.length-1]
-    
-    if (selectedCardValue >= topDiscard){
+    if (discardPile.length === 0){
+        return true
+    } else if (selectedCardValue >= topDiscard.num){
         return true
     } else if (selectedCardValue === 2) {
         return true
@@ -243,7 +257,7 @@ const canPlayCard = () => {
     //if player has cards in hand that can be played, return true.
     if (currentPlayer.hand.length != 0) {
         for (let i = 0; i >currentPlayer.hand.length; i++){
-            if (isLegalCardPlay(currentPlayer.hand[i]) === true) {
+            if (isLegalCardPlay(currentPlayer.hand[i], 'hand') === true) {
                 return true
             } 
         } 
@@ -269,44 +283,76 @@ const checkForSet = () =>{
     }
 }
 
-const displayOnDiscard = (num, suit) =>{
+const displayOnDiscard = (displayNum, suit) =>{
     document.querySelector('.discardPile .cardNum').style.visibility = 'visible' 
     document.querySelector('.discardPile .suit').style.visibility = 'visible' 
 
-    document.querySelector('.discardPile .cardNum').textContent = num
+    document.querySelector('.discardPile .cardNum').textContent = displayNum
     document.querySelector('.discardPile .suit').textContent = suit
 }
 
-const playCard = (chosenNum, chosenSuit, source) =>{
+const determineCardIndex =(chosenDisplayNum, chosenSuit, source) =>{
+    
+    // console.log(currentPlayer[source].length, 'length')
+    // console.log( chosenDisplayNum, 'chosen display num')
+    // console.log( chosenSuit, 'chosen display suit')
+    // console.log( source, 'source')
+
+    let cardIndex = 0
+    for (let i = 0; i < currentPlayer[source].length; i++){
+        console.log( currentPlayer[source][i].displayNum, 'compare display num')
+        console.log( chosenDisplayNum, 'chosen display num')
+        console.log( currentPlayer[source][i].suit, 'compare display suit')
+        console.log( chosenSuit, 'chosen display suit')
+        if (currentPlayer[source][i].displayNum === chosenDisplayNum && currentPlayer[source][i].suit === chosenSuit){
+            cardIndex = i
+            return cardIndex
+        }
+    }
+}
+
+clearDiscardDisplay =() =>{
+    document.querySelector('.discardPile .cardNum').style.visibility = 'invisible' 
+    document.querySelector('.discardPile .suit').style.visibility = 'invisible' 
+}
+
+
+const playCard = (cardInd, source, num, suit, displayNum) =>{
     // I'll deal with duplicates later
     // if have duplicate prompt want to play both? = y{
     //     add both to discard array
     // }
-    let cardIndex = 0
-    for (let i = 0; i < currentPlayer[source].length; i++){
-        if (currentPlayer[source][i].num.toString() === chosenNum.toString() && currentPlayer[source][i].suit === chosenSuit){
-           cardIndex = i
-           break
-        }
-    }
     // discardPile.push(currentPlayer.source[0])
 
-    displayOnDiscard(chosenNum, chosenSuit)
-    const handDisplay = document.querySelectorAll('.currentPlayer .hand')
+    displayOnDiscard(displayNum,  suit)
+    discardPile.push(currentPlayer[source][cardInd])
 
+    currentPlayer[source].splice(cardInd, 1)
 
-
-    if (checkForSet() || chosenNum === 10){
+    if (checkForSet() || num === 10){
         discardPile = []
         //remove cards from display discard pile
+        clearDiscardDisplay()
     }
+    discardCards.textContent = discardPile.length.toString()
 }
 
 
 
 const passAttempt = () =>{
-    changeCurrentPlayer(-1)
-    console.log('pass')
+    if (canPlayCard()){
+        console.log('please pick a card')
+    }else{
+        currentPlayer.hand.push(...discardPile)
+        let playerInd = playersArr.indexOf(currentPlayer) 
+        discardPile.forEach((card) =>{
+            displayCard(playerInd, 'hand', 'faceUp', card.displayNum, card.suit)
+        })
+        discardPile = []
+        clearDiscardDisplay()
+        changeCurrentPlayer(-1)
+        console.log('pass')
+    }
 }
 // will check if passing is a legal move.
 //if it is, current player will pick up discardPile, and the previous player goes again
@@ -334,14 +380,17 @@ passBtn.addEventListener('click', passAttempt)
 
 //This function should play a turn. currently is only swapping current player
 currentBoard.addEventListener('click', function(e){
-    console.log(e.target)
-    let selectedCardNum = e.target.closest('.card').children[0].textContent
+    console.log(e.target.closest('.card'))
     let selectedCardSuit = e.target.closest('.card').children[1].textContent
+    let selectedCardDisplayNum = e.target.closest('.card').children[0].textContent
     let selectedCardSource = e.target.closest('div').className.split(' ')[1]
-    
+    let cardInd = determineCardIndex(selectedCardDisplayNum,selectedCardSuit, selectedCardSource)
+    console.log(cardInd)
+    console.log(currentPlayer[selectedCardSource][cardInd])
+    let selectedCardNum = currentPlayer[selectedCardSource][cardInd].num
+    console.log(selectedCardNum)
     if (isLegalCardPlay(selectedCardNum)){
-        playCard(selectedCardNum,selectedCardSuit, selectedCardSource)
-        changeCurrentPlayer(1)
+        playCard(cardInd, selectedCardSource,selectedCardNum, selectedCardSuit, selectedCardDisplayNum)
         e.target.closest('.card').remove()
         currentPlayer.doneWithGame()
         if (currentPlayer.done){
@@ -351,9 +400,16 @@ currentBoard.addEventListener('click', function(e){
                 console.log(gameOver)
             }
         }
+        changeCurrentPlayer(1)
     
+    }else if (selectedCardSource === 'faceDown'){
+        currentPlayer.hand.push(currentPlayer.faceDown[cardInd])
+        e.target.closest('.card').remove()
+    } else {
+        console.log('illegal play')
+ 
     }
-    if (selectedCardSource === faceDown){
+
 })
 
 
