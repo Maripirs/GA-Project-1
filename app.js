@@ -319,8 +319,8 @@ const determineCardIndex =(chosenDisplayNum, chosenSuit, source) =>{
 
 //should set the discards visibility to invisible. not working
 clearDiscardDisplay =() =>{
-    document.querySelector('.discardPile .cardNum').style.visibility = 'invisible' 
-    document.querySelector('.discardPile .suit').style.visibility = 'invisible' 
+    document.querySelector('.discardPile .cardNum').style.visibility = 'hidden' 
+    document.querySelector('.discardPile .suit').style.visibility = 'hidden' 
 }
 
 
@@ -336,6 +336,8 @@ const playCard = (cardInd, source, num, suit, displayNum) =>{
     // discardPile.push(currentPlayer.source[0])
 
     displayOnDiscard(displayNum,  suit)
+    console.log(cardInd, 'index card to add on discard')
+    console.log(currentPlayer[source][cardInd], 'card object')
     discardPile.push(currentPlayer[source][cardInd])
 
     currentPlayer[source].splice(cardInd, 1)
@@ -351,6 +353,15 @@ const playCard = (cardInd, source, num, suit, displayNum) =>{
     discardCards.textContent = discardPile.length.toString()
 }
 
+
+const doubleCardInd = (selectedCardNum) =>{
+    for (let i = 0; i < currentPlayer.hand.length;i++ ){
+        if (currentPlayer.hand[i].num === selectedCardNum){
+            console.log("There's a dup in ", i)
+            return i
+        }
+    }
+}
 
 //checks if the player can play. if they can, they're not allowed to pass
 //if they can pass. they'll add the discard to their hand both in array and display
@@ -371,8 +382,7 @@ const passAttempt = () =>{
         console.log('pass')
     }
 }
-// will check if passing is a legal move.
-//if it is, current player will pick up discardPile, and the previous player goes again
+
 
 
 defineDeck()
@@ -415,8 +425,25 @@ currentBoard.addEventListener('click', function(e){
                 console.log(gameOver)
             }
         }
-        changeCurrentPlayer(1)
-    
+        if (selectedCardSource === 'hand'){
+            if (doubleCardInd(selectedCardNum) != null ){
+                let playAgain = prompt(`You have another ${selectedCardDisplayNum}. Do you want to play it? y/n`)
+                while (playAgain != 'y' && playAgain != 'n'){
+                    playAgain = prompt(`You have another ${selectedCardDisplayNum}. Do you want to play it? y/n`)
+                
+                }
+                if (playAgain === 'y'){
+                    console.log('playagain')
+                    let dupCardInd = doubleCardInd(selectedCardNum)
+                    console.log(dupCardInd)
+                    playCard(dupCardInd, 'hand',selectedCardNum, currentPlayer.hand[dupCardInd].suit , selectedCardDisplayNum)
+                    dupCard = document.querySelector(`.currentPlayer .hand .card:nth-of-type(${dupCardInd+1})`)
+                    console.log(dupCard, 'dupCard')
+                    dupCard.remove()
+                }
+            } 
+        }
+        // changeCurrentPlayer(1)
     }else if (selectedCardSource === 'faceDown'){
         currentPlayer.hand.push(currentPlayer.faceDown[cardInd])
         e.target.closest('.card').remove()
@@ -428,3 +455,6 @@ currentBoard.addEventListener('click', function(e){
 })
 
 
+// let selectedCard =document.querySelector(`.currentPlayer .hand .card:nth-of-type(2)`)
+// selectedCard.style.backgroundColor = 'red'
+// selectedCard.remove()
