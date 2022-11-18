@@ -8,7 +8,9 @@ let finishedPlayers = []
 const legalAmountOfPlayers = ['2','3','4']
 let playerCount = 4
 let gameOver = false
-
+let askingForMult = false
+let dupCheck = null
+let playAgain = null
 
 ////HTML ELEMENTS
 const currentBoard = document.querySelector('.currentPlayer')
@@ -20,6 +22,9 @@ const passBtn = document.querySelector('.pass')
 const almostOver = document.querySelector('.almostOver')
 const positions = document.querySelector('.positions')
 const gameOverDisplay = document.querySelector('.endGameResults')
+const messageCont = document.querySelector('.messageCont')
+const message = document.querySelector('.message')
+const playAgainBtn = document.querySelector('.playagain')
 // const handDisplay = document.querySelectorAll('.currentPlayer .hand')
 ////HTML ELEMENTS
 
@@ -105,7 +110,7 @@ const askPlayerCount = () =>{
 //will create one object for each player using the 'Player' object class
 const generatePlayers =() => {
     for (let i = 0; i < playerCount; i++){
-        playersArr[i] = new Player(`player${i+1}`)
+        playersArr[i] = new Player(`Player ${i+1}`)
     }
 }
 
@@ -244,7 +249,7 @@ const compareCardValue =(selectedCardValue) =>{
 const isLegalCardPlay = (selectedCardValue, source) =>{
     if (currentPlayer.hand.length != 0) {
         if(source != 'hand'){
-            console.log('Player tried to play card not in hand when having cards in hand')
+            displayMessage(`${currentPlayer.name} tried to play card not in hand when having cards in hand`)
             return false
         }else {
             return compareCardValue(selectedCardValue)
@@ -252,7 +257,7 @@ const isLegalCardPlay = (selectedCardValue, source) =>{
 
     } else if (currentPlayer.faceUp.length != 0){
         if(source != 'faceUp'){
-            console.log('Player tried to play faceDown card when having cards faceUp')
+            displayMessage(`${currentPlayer.name} tried to play faceDown card when having cards faceUp`)
             return false
         }else {
             return compareCardValue(selectedCardValue)
@@ -309,12 +314,6 @@ const displayOnDiscard = (displayNum, suit) =>{
 
 // loops through the cards of the player looking for the chosen one. returns the index
 const determineCardIndex =(chosenDisplayNum, chosenSuit, source) =>{
-    
-    // console.log(currentPlayer[source].length, 'length')
-    // console.log( chosenDisplayNum, 'chosen display num')
-    // console.log( chosenSuit, 'chosen display suit')
-    // console.log( source, 'source')
-
     let cardIndex = 0
     for (let i = 0; i < currentPlayer[source].length; i++){
         if (currentPlayer[source][i].displayNum === chosenDisplayNum && currentPlayer[source][i].suit === chosenSuit){
@@ -337,14 +336,13 @@ clearDiscardDisplay =() =>{
 //if conditions are met. clears discard
 const playCard = (cardInd, source) =>{
 
-    displayOnDiscard(currentPlayer[source][cardInd].displayNum, currentPlayer[source].suit)
+    displayOnDiscard(currentPlayer[source][cardInd].displayNum, currentPlayer[source][cardInd].suit)
     discardPile.push(currentPlayer[source][cardInd])
 
     currentPlayer[source].splice(cardInd, 1)
     if (gameDeck.length > 0 && currentPlayer.hand.length < 3){
         drawCard(playersArr.indexOf(currentPlayer), 'hand','hand')
     }
-
    
 }
 //Displays the position of the players than finished the game inside their boards
@@ -358,7 +356,6 @@ const displayFinalPosition=() =>{
 const doubleCardInd = (selectedCardNum) =>{
     for (let i = 0; i < currentPlayer.hand.length;i++ ){
         if (currentPlayer.hand[i].num === selectedCardNum){
-            console.log("There's a dup in ", i)
             return i
         }
     }
@@ -369,7 +366,8 @@ const doubleCardInd = (selectedCardNum) =>{
 //previous player goes again
 const passAttempt = () =>{
     if (canPlayCard()){
-        console.log('please pick a card')
+
+        displayMessage(`Please pick a card`)
     }else{
         currentPlayer.hand.push(...discardPile)
         let playerInd = playersArr.indexOf(currentPlayer) 
@@ -411,9 +409,8 @@ const findIndex = (e) =>{
     }
 }
 
-// finished game
+// When a player finishes the game, it will add them to the list of dinished players and check if the game is over
 const removeFromGame =() =>{
-    console.log( 'this player is done')
     finishedPlayers.push(currentPlayer)
     console.log(playersArr)
     displayFinalPosition()
@@ -425,29 +422,44 @@ const removeFromGame =() =>{
     }
 }
 
+// recursive function looking if the player has more cards of the same value
 const checkForMultiples =(selCardNum, selCardDisplayNum) =>{
     console.log(selCardNum, 'checking for multiples')
     if (doubleCardInd(selCardNum) != null ){
-        let playAgain = prompt(`You have another ${selCardDisplayNum}. Do you want to play it? y/n`)
-        while (playAgain != 'y' && playAgain != 'n'){
-            playAgain = prompt(`You have another ${selCardDisplayNum}. Do you want to play it? y/n`)
+        console.log('found a dup')
+        dupCheck = selCardNum 
+        askingForMult = true
+        messageCont.style.display = 'flex'
+        message.textContent = `You have another ${selCardDisplayNum}. Select it if you wish to play it`
+        playAgainBtn.style.display = 'flex'
+
+
+        // let playAgain = prompt(`You have another ${selCardDisplayNum}. Do you want to play it? y/n`)
+        // while (playAgain != 'y' && playAgain != 'n'){
+        //     playAgain = prompt(`You have another ${selCardDisplayNum}. Do you want to play it? y/n`)
         
-        }
-        if (playAgain === 'y'){
-            console.log('playagain')
-            let dupCardInd = doubleCardInd(selCardNum)
-            console.log(dupCardInd)
-            playCard(dupCardInd, 'hand',selCardNum, currentPlayer.hand[dupCardInd].suit , selCardDisplayNum)
-            dupCard = document.querySelector(`.currentPlayer .hand .card:nth-of-type(${dupCardInd+1})`)
-            console.log(dupCard, 'dupCard')
-            dupCard.remove()
-            checkForMultiples(selCardNum, selCardDisplayNum)
-        }
+        // }
+        // if (playAgain === 'y'){
+        //     console.log('playagain')
+        //     let dupCardInd = doubleCardInd(selCardNum)
+        //     console.log(dupCardInd)
+        //     playCard(dupCardInd, 'hand',selCardNum, currentPlayer.hand[dupCardInd].suit , selCardDisplayNum)
+        //     dupCard = document.querySelector(`.currentPlayer .hand .card:nth-of-type(${dupCardInd+1})`)
+        //     console.log(dupCard, 'dupCard')
+        //     dupCard.remove()
+        // }
     }
 }
 
-
-
+//Will add the argument as text content and display the message container
+const displayMessage = (content) =>{
+    playAgainBtn.style.display= 'none'
+    messageCont.style.display = 'flex'
+    message.textContent = content
+    setTimeout(() => {
+        messageCont.style.display = 'none'
+    }, 4000)
+}
 
 defineDeck()
 shuffleDeck(completeDeck)
@@ -467,70 +479,120 @@ Event Listeners past this line
 */
 
 
-
+//event listener for pass button
 passBtn.addEventListener('click', passAttempt)
 
 
-
+//main function
 currentBoard.addEventListener('click', function(e){
+    debugger
     let cardIndex = findIndex(e)
     let source = e.target.closest('div').className.split(' ')[1]
     console.log(cardIndex, 'cardIndex')
     let selCard = currentPlayer[source][cardIndex]
     console.log(selCard, 'selected Card')
-
-    if (isLegalCardPlay(selCard.num , source)){
-        playCard(cardIndex, source)
-        e.target.closest('.card').remove()
-        if (source === 'hand'){
-            checkForMultiples(selCard.num, selCard.displayNum)
-        } 
-        currentPlayer.doneWithGame()
-        if (currentPlayer.done){
-            removeFromGame()
-        }
-        if (checkForSet() || selCard.num === 10 ){
-            if (selCard.num ===10 ){
-                console.log('You played a 10. Play again')
-            } else{
-                console.log('You completed a set in the discard Pile. Play again')
-            }
-            discardPile = []
-            //remove cards from display discard pile
-            clearDiscardDisplay()
-            discardCards.textContent = discardPile.length.toString()
-        } 
-
-        discardCards.textContent = discardPile.length.toString()
-        
-        if(gameOver != true){
-            changeCurrentPlayer(1)
-            while (currentPlayer.done === true){
-                changeCurrentPlayer(1)
-            }
-        }
-        
-
-
-    }else if (source === 'faceDown'){
-        if (currentPlayer.hand.length != 0){
-            console.log('Player tried to play card not in hand when having cards in hand')
-        } else{
-            displayCard(playerInd, 'hand', 'hand', selectedCardDisplayNum, selectedCardSuit)
-            currentPlayer.hand.push(currentPlayer.faceDown[cardInd])
+    console.log(askingForMult, 'asking for multiples')
+    if (askingForMult === false){
+        if (isLegalCardPlay(selCard.num , source)){
+            playCard(cardIndex, source)
             e.target.closest('.card').remove()
-            changeCurrentPlayer(-1)
-            while (currentPlayer.done === true){
-                changeCurrentPlayer(-1)
+            if (source === 'hand'){
+                checkForMultiples(selCard.num, selCard.displayNum)
+            } if (askingForMult === false) {
+
+                currentPlayer.doneWithGame()
+                if (currentPlayer.done){
+                    removeFromGame()
+                }
+                if (checkForSet() || selCard.num === 10 ){
+                    if (selCard.num ===10 ){
+                        displayMessage('You played a 10. Play again')
+                    } else{
+                        displayMessage('You completed a set in the discard Pile. Play again')
+                    }
+                    discardPile = []
+                    //remove cards from display discard pile
+                    clearDiscardDisplay()
+                    discardCards.textContent = discardPile.length.toString()
+                } 
+                
+                discardCards.textContent = discardPile.length.toString()
+                
+                if(gameOver != true){
+                    changeCurrentPlayer(1)
+                    while (currentPlayer.done === true){
+                        changeCurrentPlayer(1)
+                    }
+                    messageCont.style.display = 'none'
+                }
             }
+                
+                
+        }else if (source === 'faceDown'){
+            if (currentPlayer.hand.length != 0){
+                console.log('Player tried to play card not in hand when having cards in hand')
+                displayMessage('Player tried to play card not in hand when having cards in hand')
+            } else{
+                displayCard(playerInd, 'hand', 'hand', selectedCardDisplayNum, selectedCardSuit)
+                currentPlayer.hand.push(currentPlayer.faceDown[cardInd])
+                e.target.closest('.card').remove()
+                changeCurrentPlayer(-1)
+                while (currentPlayer.done === true){
+                    changeCurrentPlayer(-1)
+                    messageCont.style.display = 'none'
+                }
+            }
+        } else {
+            displayMessage(`${selCard.num} has a lower value than ${discardPile[discardPile.length-1].displayNum}. Pick a different card `)
+            console.log('illegal play')
+            
         }
-    } else {
-        console.log('illegal play')
- 
+    // if trying to play a double card
+    } else if (selCard.num === discardPile[discardPile.length-1].num){
+        //check if there are more
+        checkForMultiples(selCard.num, selCard.displayNum)
+        //if there are no more left, complete turn 
+        if (askingForMult === false) {
+            playCard(cardIndex, source)
+            e.target.closest('.card').remove()
+            checkForMultiples(selCard.num, selCard.displayNum)
+
+            currentPlayer.doneWithGame()
+            if (currentPlayer.done){
+                removeFromGame()
+            }
+            if (checkForSet() || selCard.num === 10 ){
+                if (selCard.num ===10 ){
+                    displayMessage('You played a 10. Play again')
+                } else{
+                    displayMessage('You completed a set in the discard Pile. Play again')
+                }
+                discardPile = []
+                //remove cards from display discard pile
+                clearDiscardDisplay()
+                discardCards.textContent = discardPile.length.toString()
+            } 
+            
+            discardCards.textContent = discardPile.length.toString()
+            
+            if(gameOver != true){
+                changeCurrentPlayer(1)
+                while (currentPlayer.done === true){
+                    changeCurrentPlayer(1)
+                }
+                messageCont.style.display = 'none'
+            }
+        } else{
+            playCard(cardIndex, source)
+            e.target.closest('.card').remove()
+            checkForMultiples(selCard.num, selCard.displayNum)
+        }
+
     }
+        
+    })
 
-})
-
+///Just for testing
 almostOver.addEventListener('click', function(){
     gameDeck = []
 
@@ -551,6 +613,35 @@ almostOver.addEventListener('click', function(){
     displayCard(playersArr.indexOf(currentPlayer), 'hand', 'hand', 'A', suits[2])
     deckCards.textContent = (gameDeck.length).toString()
 })
+
+//To continue without playing dups
+
+playAgainBtn.addEventListener('click', function(){
+    playAgain = false
+    currentPlayer.doneWithGame()
+            if (currentPlayer.done){
+                removeFromGame()
+            }
+            if (checkForSet()){
+                displayMessage('You completed a set in the discard Pile. Play again')
+                discardPile = []
+                //remove cards from display discard pile
+                clearDiscardDisplay()
+                discardCards.textContent = discardPile.length.toString()
+            } 
+            
+            discardCards.textContent = discardPile.length.toString()
+            
+            if(gameOver != true){
+                changeCurrentPlayer(1)
+                while (currentPlayer.done === true){
+                    changeCurrentPlayer(1)
+                }
+            }
+            askingForMult = false
+            messageCont.style.display = 'none'
+})
+
 
 
 // let selectedCard =document.querySelector(`.currentPlayer .hand .card:nth-of-type(2)`)

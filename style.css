@@ -50,11 +50,12 @@ body, div{
     height: 90%;
     width: 30%;
     justify-content: space-around;
-    border-radius: 5%;
+    border-radius: 1.5vmin;
 }
 .currentPlayer .playerBoard{
     width: 90%;
     height: 90%;
+    border-radius: 2vmin;
 }
 .hand, .faceDownRow, .faceUpRow {
     flex-direction: row;
@@ -64,7 +65,7 @@ body, div{
 .card{
     height: 90%;
     width: 100%;
-    border-radius: 15%;
+    border-radius: 1.5vmin;
     margin: 0 .5vw;
     border: rgb(215, 215, 215) .3vh solid;
     flex-direction: column;
@@ -126,4 +127,16 @@ h3{
 }
 .gameOver{
     font-size: 5vmin
+}
+.messageCont{
+    background-color: rgb(199, 180, 210);
+    padding: .5vmin 3vmin;
+    position: absolute;
+    top: 57vh;
+    display: none;
+    border-radius: .5vmin;
+}
+.playagain {
+    display: none;
+    margin-top: 1vh
 }
