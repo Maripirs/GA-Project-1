@@ -3,11 +3,10 @@ let gameDeck =[]
 let discardPile = []
 let cardsInDiscard = 0
 let suits = ['♠', '♣', '♦', '♥']
-suits = ['♠', '♣']
 let playersArr = []
 let finishedPlayers = []
 const legalAmountOfPlayers = ['2','3','4']
-let playerCount = 2
+let playerCount = 3
 
 
 ////HTML ELEMENTS
@@ -348,6 +347,12 @@ const playCard = (cardInd, source, num, suit, displayNum) =>{
    
 }
 
+const displayFinalPosition=() =>{
+    let positionDisplay =createElement('.finalText', `${currentPlayer.name} Finished game in ${finishedPlayers.length} position`)
+    const middleRow = document.querySelector('.currentPlayer .faceUpRow')
+    middleRow.append(positionDisplay)
+}
+
 
 const doubleCardInd = (selectedCardNum) =>{
     for (let i = 0; i < currentPlayer.hand.length;i++ ){
@@ -373,6 +378,9 @@ const passAttempt = () =>{
         discardPile = []
         clearDiscardDisplay()
         changeCurrentPlayer(-1)
+        while (currentPlayer.done === true){
+            changeCurrentPlayer(-1)
+        }
         discardCards.textContent = discardPile.length.toString()
         console.log('pass')
     }
@@ -420,6 +428,8 @@ currentBoard.addEventListener('click', function(e){
     console.log(cardInd, 'card Ind')
     let selectedCardNum = currentPlayer[selectedCardSource][cardInd].num
     console.log(selectedCardNum, 'selected card num')
+
+
     if (isLegalCardPlay(selectedCardNum, selectedCardSource)){
         playCard(cardInd, selectedCardSource,selectedCardNum, selectedCardSuit, selectedCardDisplayNum)
         e.target.closest('.card').remove()
@@ -428,8 +438,9 @@ currentBoard.addEventListener('click', function(e){
         if (currentPlayer.done){
             console.log( 'this player is done')
             finishedPlayers.push(currentPlayer)
-            playersArr.splice(playersArr.indexOf(currentPlayer, 1))
-            if (playersArr.length === 0){
+            console.log(playersArr)
+            displayFinalPosition()
+            if (playersArr.length === finishedPlayers.length){
                 console.log(gameOver)
             }
         }
@@ -463,11 +474,16 @@ currentBoard.addEventListener('click', function(e){
             discardCards.textContent = discardPile.length.toString()
         } else if (selectedCardNum ===2){
             discardCards.textContent = discardPile.length.toString()
-        } else{
+        }   
+
+        discardCards.textContent = discardPile.length.toString()
+        changeCurrentPlayer(1)
+        console.log(currentPlayer.name)
+        while (currentPlayer.done === true){
             
-            discardCards.textContent = discardPile.length.toString()
             changeCurrentPlayer(1)
         }
+        
 
 
     }else if (selectedCardSource === 'faceDown'){
@@ -478,6 +494,9 @@ currentBoard.addEventListener('click', function(e){
             currentPlayer.hand.push(currentPlayer.faceDown[cardInd])
             e.target.closest('.card').remove()
             changeCurrentPlayer(-1)
+            while (currentPlayer.done === true){
+                changeCurrentPlayer(-1)
+            }
         }
     } else {
         console.log('illegal play')
@@ -488,7 +507,7 @@ currentBoard.addEventListener('click', function(e){
 
 almostOver.addEventListener('click', function(){
     gameDeck = []
-    
+
     let winningCard = new Card(suits[0], 14, 'A')
     currentPlayer.hand = [winningCard] 
     currentPlayer.faceUp = []
@@ -500,6 +519,7 @@ almostOver.addEventListener('click', function(){
     removeAllChildNodes(faceUpRow1);
     removeAllChildNodes(faceDownRow1);
     displayCard(playersArr.indexOf(currentPlayer), 'hand', 'hand', 'A', suits[0])
+    deckCards.textContent = (gameDeck.length).toString()
 })
 
 
@@ -507,7 +527,3 @@ almostOver.addEventListener('click', function(){
 // selectedCard.style.backgroundColor = 'red'
 // selectedCard.remove()
 
-let player5 = new Player (`player5`)
-console.log (player5)
-player5.doneWithGame()
-console.log(player5)
