@@ -6,7 +6,7 @@ let suits = ['♠', '♣', '♦', '♥']
 let playersArr = []
 let finishedPlayers = []
 const legalAmountOfPlayers = ['2','3','4']
-let playerCount = 3
+let playerCount = 4
 let gameOver = false
 
 
@@ -289,7 +289,6 @@ const canPlayCard = () => {
 //looks for matching cards on top of the discard pile
 const checkForSet = () =>{
     if (discardPile.length >= 3) {
-        console.log(discardPile)
         if (discardPile[discardPile.length-1].num === discardPile[discardPile.length-2].num &&
             discardPile[discardPile.length-1].num === discardPile[discardPile.length-3].num){
                 return true
@@ -349,7 +348,7 @@ const playCard = (cardInd, source, num, suit, displayNum) =>{
 
    
 }
-
+//Displays the position of the players than finished the game inside their boards
 const displayFinalPosition=() =>{
     let positionDisplay =createElement('.finalText', `${currentPlayer.name} Finished game in ${finishedPlayers.length} position`)
     const middleRow = document.querySelector('.currentPlayer .faceUpRow')
@@ -389,11 +388,31 @@ const passAttempt = () =>{
     }
 }
 
-function removeAllChildNodes(parent) {
-    while (parent.firstChild) {
-        parent.removeChild(parent.firstChild);
+
+//Just for testing / demo
+//clears the cards from the requested set
+const removeAllCards = (source) => {
+    while (source.firstChild) {
+        source.removeChild(source.firstChild);
     }
 }
+
+//takes event target and it returns the index of element in it's parent
+const findIndex =(e) =>{
+    let selectedCard = e.target.closest('.card')
+    let source = e.target.closest('.card').parentNode
+    let cardsInSource = source.childNodes
+    cardsInSource.forEach((card, index) =>{
+        if (selectedCard === card){
+            return index
+        }
+    })
+
+
+}
+
+
+
 
 
 defineDeck()
@@ -419,25 +438,11 @@ passBtn.addEventListener('click', passAttempt)
 
 //This function should play a turn. currently is only swapping current player
 currentBoard.addEventListener('click', function(e){
-    console.log(e.target)
-
-    let playerInd = playersArr.indexOf(currentPlayer)
-    let selectedCardSuit = e.target.closest('.card').children[1].textContent
-    console.log(selectedCardSuit, 'selected card suit')
-    let selectedCardDisplayNum = e.target.closest('.card').children[0].textContent
-    let selectedCardSource = e.target.closest('div').className.split(' ')[1]
-    console.log(selectedCardSource, 'selected card source')
-    let cardInd = determineCardIndex(selectedCardDisplayNum,selectedCardSuit, selectedCardSource)
-    console.log(cardInd, 'card Ind')
-    let selectedCardNum = currentPlayer[selectedCardSource][cardInd].num
-    console.log(selectedCardNum, 'selected card num')
-
-
+    let cardIndex = findIndex(e)
     if (isLegalCardPlay(selectedCardNum, selectedCardSource)){
         playCard(cardInd, selectedCardSource,selectedCardNum, selectedCardSuit, selectedCardDisplayNum)
         e.target.closest('.card').remove()
         currentPlayer.doneWithGame()
-        console.log(currentPlayer.done, 'done')
         if (currentPlayer.done){
             console.log( 'this player is done')
             finishedPlayers.push(currentPlayer)
@@ -483,13 +488,13 @@ currentBoard.addEventListener('click', function(e){
         }   
 
         discardCards.textContent = discardPile.length.toString()
-        console.log(currentPlayer.name)
-        if(gameOver != true){
-            changeCurrentPlayer(1)
-            while (currentPlayer.done === true){
-                changeCurrentPlayer(1)
-            }
-        }
+        
+        // if(gameOver != true){
+        //     changeCurrentPlayer(1)
+        //     while (currentPlayer.done === true){
+        //         changeCurrentPlayer(1)
+        //     }
+        // }
         
 
 
@@ -522,9 +527,9 @@ almostOver.addEventListener('click', function(){
     const handRow1 = document.querySelector('.currentPlayer .hand');
     const faceUpRow1 = document.querySelector('.currentPlayer .faceUpRow');
     const faceDownRow1 = document.querySelector('.currentPlayer .faceDownRow');
-    removeAllChildNodes(handRow1);
-    removeAllChildNodes(faceUpRow1);
-    removeAllChildNodes(faceDownRow1);
+    removeAllCards(handRow1);
+    removeAllCards(faceUpRow1);
+    removeAllCards(faceDownRow1);
     displayCard(playersArr.indexOf(currentPlayer), 'hand', 'hand', 'A', suits[0])
     deckCards.textContent = (gameDeck.length).toString()
 })
