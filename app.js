@@ -7,6 +7,7 @@ let playersArr = []
 let finishedPlayers = []
 const legalAmountOfPlayers = ['2','3','4']
 let playerCount = 3
+let gameOver = false
 
 
 ////HTML ELEMENTS
@@ -17,6 +18,8 @@ const deckCards = document.querySelector('.deckCards')
 const discardCards = document.querySelector('.discardCards')
 const passBtn = document.querySelector('.pass')
 const almostOver = document.querySelector('.almostOver')
+const positions = document.querySelector('.positions')
+const gameOverDisplay = document.querySelector('.endGameResults')
 // const handDisplay = document.querySelectorAll('.currentPlayer .hand')
 ////HTML ELEMENTS
 
@@ -440,8 +443,11 @@ currentBoard.addEventListener('click', function(e){
             finishedPlayers.push(currentPlayer)
             console.log(playersArr)
             displayFinalPosition()
+            let positionLi = createElement('positionLi', `${currentPlayer.name}`, 'li')
+            positions.append(positionLi)
             if (playersArr.length === finishedPlayers.length){
-                console.log(gameOver)
+                gameOverDisplay.style.display = 'flex'
+                gameOver = true
             }
         }
         if (selectedCardSource === 'hand'){
@@ -477,11 +483,12 @@ currentBoard.addEventListener('click', function(e){
         }   
 
         discardCards.textContent = discardPile.length.toString()
-        changeCurrentPlayer(1)
         console.log(currentPlayer.name)
-        while (currentPlayer.done === true){
-            
+        if(gameOver != true){
             changeCurrentPlayer(1)
+            while (currentPlayer.done === true){
+                changeCurrentPlayer(1)
+            }
         }
         
 

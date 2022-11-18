@@ -111,3 +111,18 @@ h3{
 .hand .card{
     background-color: pink;
 }
+
+.endGameResults{
+    width: 70vmin;
+    max-width: 50vmax;
+    height: 26vh;
+    border-radius: 10vmax;
+    border: 1vmin solid rgb(81, 81, 81); 
+    position: absolute;
+    background-color: rgb(214, 139, 99);
+    color: white;
+    display: none;
+}
+.gameOver{
+    font-size: 5vmin
+}
