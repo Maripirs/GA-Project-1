@@ -335,13 +335,13 @@ clearDiscardDisplay =() =>{
 //removes it from the player both in the array and display
 //if conditions are met. clears discard
 const playCard = (cardInd, source) =>{
-
+    
     displayOnDiscard(currentPlayer[source][cardInd].displayNum, currentPlayer[source][cardInd].suit)
     discardPile.push(currentPlayer[source][cardInd])
-
     currentPlayer[source].splice(cardInd, 1)
     if (gameDeck.length > 0 && currentPlayer.hand.length < 3){
-        drawCard(playersArr.indexOf(currentPlayer), 'hand','hand')
+
+    drawCard(playersArr.indexOf(currentPlayer), 'hand','hand')
     }
    
 }
@@ -448,8 +448,13 @@ const checkForMultiples =(selCardNum, selCardDisplayNum) =>{
         //     console.log(dupCard, 'dupCard')
         //     dupCard.remove()
         // }
+    }else {
+        askingForMult = false
     }
 }
+
+
+
 
 //Will add the argument as text content and display the message container
 const displayMessage = (content) =>{
@@ -485,17 +490,16 @@ passBtn.addEventListener('click', passAttempt)
 
 //main function
 currentBoard.addEventListener('click', function(e){
-    debugger
     let cardIndex = findIndex(e)
     let source = e.target.closest('div').className.split(' ')[1]
-    console.log(cardIndex, 'cardIndex')
     let selCard = currentPlayer[source][cardIndex]
-    console.log(selCard, 'selected Card')
-    console.log(askingForMult, 'asking for multiples')
+
+
+    //Will excecute a normal turn if we are not currently being asked if we wish to play an extra identical card
     if (askingForMult === false){
         if (isLegalCardPlay(selCard.num , source)){
-            playCard(cardIndex, source)
             e.target.closest('.card').remove()
+            playCard(cardIndex, source)
             if (source === 'hand'){
                 checkForMultiples(selCard.num, selCard.displayNum)
             } if (askingForMult === false) {
@@ -514,23 +518,19 @@ currentBoard.addEventListener('click', function(e){
                     //remove cards from display discard pile
                     clearDiscardDisplay()
                     discardCards.textContent = discardPile.length.toString()
-                } 
-                
-                discardCards.textContent = discardPile.length.toString()
-                
-                if(gameOver != true){
-                    changeCurrentPlayer(1)
+                } else if(gameOver != true){
+                    setTimeout(changeCurrentPlayer(1), '2000')
                     while (currentPlayer.done === true){
                         changeCurrentPlayer(1)
                     }
                     messageCont.style.display = 'none'
                 }
+                discardCards.textContent = discardPile.length.toString()
             }
                 
-                
+
         }else if (source === 'faceDown'){
             if (currentPlayer.hand.length != 0){
-                console.log('Player tried to play card not in hand when having cards in hand')
                 displayMessage('Player tried to play card not in hand when having cards in hand')
             } else{
                 displayCard(playerInd, 'hand', 'hand', selectedCardDisplayNum, selectedCardSuit)
@@ -544,50 +544,41 @@ currentBoard.addEventListener('click', function(e){
             }
         } else {
             displayMessage(`${selCard.num} has a lower value than ${discardPile[discardPile.length-1].displayNum}. Pick a different card `)
-            console.log('illegal play')
             
         }
     // if trying to play a double card
     } else if (selCard.num === discardPile[discardPile.length-1].num){
-        //check if there are more
-        checkForMultiples(selCard.num, selCard.displayNum)
         //if there are no more left, complete turn 
-        if (askingForMult === false) {
-            playCard(cardIndex, source)
-            e.target.closest('.card').remove()
-            checkForMultiples(selCard.num, selCard.displayNum)
-
+        let selCardNum = selCard.num
+        let selCardDisplayNum =selCard.displayNum
+        playCard(cardIndex, source)
+        e.target.closest('.card').remove()
+        checkForMultiples(selCardNum, selCardDisplayNum)
+        console.log(askingForMult)
+        if (askingForMult=== false){
             currentPlayer.doneWithGame()
-            if (currentPlayer.done){
-                removeFromGame()
-            }
-            if (checkForSet() || selCard.num === 10 ){
-                if (selCard.num ===10 ){
-                    displayMessage('You played a 10. Play again')
-                } else{
-                    displayMessage('You completed a set in the discard Pile. Play again')
+                if (currentPlayer.done){
+                    removeFromGame()
                 }
-                discardPile = []
-                //remove cards from display discard pile
-                clearDiscardDisplay()
+                 if((currentPlayer.done === false)&& (checkForSet() || selCard.num === 10 )){
+                    if (selCard.num ===10 ){
+                        displayMessage('You played a 10. Play again')
+                    } else{
+                        displayMessage('You completed a set in the discard Pile. Play again')
+                    }
+                    discardPile = []
+                    //remove cards from display discard pile
+                    clearDiscardDisplay()
+                    discardCards.textContent = discardPile.length.toString()
+                } else if(gameOver != true){
+                    setTimeout(changeCurrentPlayer(1), '2000')
+                    while (currentPlayer.done === true){
+                        changeCurrentPlayer(1)
+                    }
+                    messageCont.style.display = 'none'
+                }
                 discardCards.textContent = discardPile.length.toString()
-            } 
-            
-            discardCards.textContent = discardPile.length.toString()
-            
-            if(gameOver != true){
-                changeCurrentPlayer(1)
-                while (currentPlayer.done === true){
-                    changeCurrentPlayer(1)
-                }
-                messageCont.style.display = 'none'
-            }
-        } else{
-            playCard(cardIndex, source)
-            e.target.closest('.card').remove()
-            checkForMultiples(selCard.num, selCard.displayNum)
         }
-
     }
         
     })
