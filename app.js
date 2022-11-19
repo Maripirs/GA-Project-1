@@ -348,7 +348,9 @@ const playCard = (cardInd, source) =>{
 //Displays the position of the players than finished the game inside their boards
 const displayFinalPosition=() =>{
     let positionDisplay =createElement('.finalText', `${currentPlayer.name} Finished game in ${finishedPlayers.length} position`)
-    const middleRow = document.querySelector('.currentPlayer .faceUpRow')
+    positionDisplay.style.color = 'white'
+    positionDisplay.className = 'playerPosition'
+    const middleRow = document.querySelector('.currentPlayer .playerBoard')
     middleRow.append(positionDisplay)
 }
 

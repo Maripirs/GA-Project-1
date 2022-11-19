@@ -13,30 +13,47 @@ body, div{
     flex-direction: column;
     justify-content: center;
 }
+
+
+.inactivePlayers .faceDownRow, .inactivePlayers .faceUpRow{
+    justify-content: space-around;
+    margin-right: 1vw;
+}
+
 .faceUp{
     background-color: white;
     flex-direction: row;
 }
+/* 
+.inactivePlayers .faceUp, .currentPlayer .faceUp{
+    transform: translate(1em, 6.5em);
+} */
 
 .faceDown{
     background-color: grey;
     flex-direction: row;
 }
+
 .header{
     background-color: rgb(16, 12, 37);
     color: white;
     height: 5vh;
     width: 100%;
     display: flex;
+    border-radius: 2vh;
     
 }
 .inactivePlayers{
-    height:30vh;
+    height: 28vh;
     width: 100%;
-
     flex-direction: row;
     justify-content: space-around;
+    font-size: 0.9vh;
 }
+.inactivePlayers .playerBoard{
+    padding-bottom: 1vh;
+}
+
 .tableCenter{
     height: 27vh;
     width: 100%;
@@ -45,6 +62,8 @@ body, div{
 .currentPlayer{
     height:35vh;
     width: 100%;
+    font-size: 1.1vh;
+
 }
 .playerBoard{
     height: 90%;
@@ -59,22 +78,23 @@ body, div{
 }
 .hand, .faceDownRow, .faceUpRow {
     flex-direction: row;
-    height: 30%;
+    height: 50%;
     width: 100%;
 }
 .card{
-    height: 90%;
-    width: 100%;
-    border-radius: 1.5vmin;
+    height: 7em;
+    width: 4em;
+    border-radius: 1em;
     margin: 0 .5vw;
     border: rgb(215, 215, 215) .3vh solid;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-
+    
 }
 .currentPlayer .card{
-    width: 5vh;
+    width: 6em;
+    height: 10.5em;
 }
 
 .discard, .deck{
@@ -82,8 +102,8 @@ body, div{
     height: 17vh;
 }
 .tableCenter .card {
-    width: 60%;
-    height: 90%;
+    width: 6em;
+    height: 10.5em;
 }
 
 .hid{
@@ -110,7 +130,7 @@ h3{
     margin: 0;
 }
 .hand .card{
-    background-color: pink;
+    background-color: rgb(255, 255, 255);
 }
 
 .endGameResults{
@@ -132,11 +152,92 @@ h3{
     background-color: rgb(199, 180, 210);
     padding: .5vmin 3vmin;
     position: absolute;
-    top: 57vh;
+    top: 55vh;
     display: none;
-    border-radius: .5vmin;
+    border-radius: .7vh;
 }
 .playagain {
     display: none;
     margin-top: 1vh
+}
+
+.inactivePlayers .faceUpRow{
+    position: relative;
+    bottom: -6em;
+    right: -1.2em;
+}
+.currentPlayer .faceUpRow{
+    position: relative;
+    bottom: -6em;
+    right: -1.2em;
+}
+.faceUpRow{
+    height: 1em;
+}
+
+.currentPlayer .faceDown, .currentPlayer .faceUp{
+    margin :2em
+}
+
+.playerPosition{
+    position: relative;
+    bottom: 45%;
+    font-size: 2vh;
+    text-align: center;
+}
+
+button{
+    height: 2vh;
+    font-size: 1vh;
+}
+
+@media (min-width: 600px){
+    .currentPlayer{
+        position: absolute;
+        left: 35vw;
+        bottom: 2vh;
+        height: 40vh;
+        width: 63vw;
+    }
+    .inactivePlayers{
+        position: absolute;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 30vw;
+        height: 90vh;
+        left: 2vw;
+        bottom: 2vh;
+
+    }
+    .inactivePlayers .playerBoard{
+        width: 100%;
+        height: 27vh;
+    }
+    .currentPlayer .playerBoard{
+        width: 100%;
+        height: 100%;
+    }
+    .tableCenter{
+        position: absolute;
+        width: 63vw;
+        height: 50vh;
+        right: 2vw;
+        top: 9vh;
+    }
+    .buttons{
+        position: absolute;
+        width: 63vw;
+        right: 2vw;
+        top: 52vh;
+    }
+
+    .clearCont{
+        position: absolute;
+        height: 5vh;
+        width: 63vw;
+        right:2vw;
+        top: -10vh;
+        display: flex;
+    }
+
 }
