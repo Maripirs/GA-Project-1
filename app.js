@@ -34,6 +34,7 @@ const welcomeScreen = document.querySelector('.welcomeScreen')
 const rulesButton = document.querySelector('.rulesButton')
 const closeRules = document.querySelector('.closeRules')
 const rules = document.querySelector('.rules')
+const removePlayer = document.querySelector('.removePlayer')
 // const handDisplay = document.querySelectorAll('.currentPlayer .hand')
 ////HTML ELEMENTS
 
@@ -149,6 +150,7 @@ const displayPlayerBoards =() =>{
         playerBoards[i].appendChild(createElement('hand'))
         playerBoards[i].appendChild(createElement('faceUpRow'))
         playerBoards[i].appendChild(createElement('faceDownRow' ))
+
     }
 }
 
@@ -656,9 +658,18 @@ addPlayer.addEventListener('click', function(){
     playerInput.setAttribute('id', `pl${playerList.childElementCount + 1}`)
     playerInput.setAttribute('placeholder', `Player ${playerList.childElementCount + 1}`)
     
+    removePlayer.style.display = 'flex'
     playerList.append(playerInput)
     if(playerList.childElementCount === 4){
         addPlayer.remove()
+    }
+})
+
+
+removePlayer.addEventListener('click', function(){
+    playerList.lastChild.remove()
+    if (playerList.childElementCount === 2){
+        removePlayer.style.display = 'none'
     }
 })
 
