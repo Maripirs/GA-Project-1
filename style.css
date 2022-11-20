@@ -58,6 +58,7 @@ body, div{
     height: 27vh;
     width: 100%;
     flex-direction: row;
+    display: none
 }
 .currentPlayer{
     height:35vh;
@@ -191,6 +192,77 @@ button{
     font-size: 1vh;
 }
 
+.welcomeScreen, .rules{
+    background-color: rgb(180, 100, 180);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80vmin;
+    max-width: 50vmax;
+    height: 80vmin;
+    max-height: 50vmax ;
+    display: flex;
+    color: white;
+    border-radius: 5vmin;
+}
+.rules{
+    background-color: rgb(36, 8, 31);
+    display: none;
+}
+.rulesText{
+    font-size : 80%;
+    margin: 5vmin;
+}
+h2{
+    position: relative;
+    top: 3vmin
+}
+
+.playerList{
+    display: flex;
+    flex-direction: column;
+}
+input{
+    margin-bottom: 1vmin;
+}
+.submitPlayers{
+    margin: 2vmin
+}
+.playerName{
+    color: white;
+    margin-top: 1vmin;
+    font-size: 2vh;
+}
+
+.fade-out{
+    animation: fadeOut 2s;
+    opacity: 0;
+}
+
+.rulesButton, .closeRules{
+    background-color: transparent;
+    color: white;
+    height: 2vh;
+    width: 2vh;
+    border-radius: 8vw;
+    border: white solid 1px
+}
+.rulesButton{
+    position: absolute;
+    right: 7vw;
+}
+.closeRules{
+    position: absolute;
+    right: 7vw;
+    top: 2vh
+}
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+}
+
 @media (min-width: 600px){
     .currentPlayer{
         position: absolute;
@@ -238,6 +310,11 @@ button{
         right:2vw;
         top: -10vh;
         display: flex;
+    }
+    .currentPlayer .faceUpRow{
+        position: relative;
+        bottom: -8em;
+        right: -1.2em;
     }
 
 }

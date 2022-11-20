@@ -4,15 +4,17 @@ let discardPile = []
 let cardsInDiscard = 0
 let suits = ['♠', '♣', '♦', '♥']
 let playersArr = []
+let playersNames = []
 let finishedPlayers = []
-const legalAmountOfPlayers = ['2','3','4']
 let playerCount = 4
 let gameOver = false
 let askingForMult = false
 let dupCheck = null
 let playAgain = null
+let currentPlayer = null
 
 ////HTML ELEMENTS
+const tableCenter = document.querySelector('.tableCenter')
 const currentBoard = document.querySelector('.currentPlayer')
 const inactivePlayers = document.querySelector('.inactivePlayers')
 let playerBoards = []
@@ -25,6 +27,13 @@ const gameOverDisplay = document.querySelector('.endGameResults')
 const messageCont = document.querySelector('.messageCont')
 const message = document.querySelector('.message')
 const playAgainBtn = document.querySelector('.playagain')
+const addPlayer = document.querySelector('.addPlayer')
+const playerList = document.querySelector('.playerList')
+const submitPlayers = document.querySelector('.submitPlayers')
+const welcomeScreen = document.querySelector('.welcomeScreen')
+const rulesButton = document.querySelector('.rulesButton')
+const closeRules = document.querySelector('.closeRules')
+const rules = document.querySelector('.rules')
 // const handDisplay = document.querySelectorAll('.currentPlayer .hand')
 ////HTML ELEMENTS
 
@@ -110,7 +119,7 @@ const askPlayerCount = () =>{
 //will create one object for each player using the 'Player' object class
 const generatePlayers =() => {
     for (let i = 0; i < playerCount; i++){
-        playersArr[i] = new Player(`Player ${i+1}`)
+        playersArr[i] = new Player(`${playersNames[i]}`)
     }
 }
 
@@ -136,6 +145,7 @@ const displayPlayerBoards =() =>{
             inactivePlayers.appendChild(playerBoards[i])
             playerBoards[i].setAttribute('id', `player${i+1}`)
         }
+        playerBoards[i].appendChild(createElement('playerName', `${playersNames[i]}`))
         playerBoards[i].appendChild(createElement('hand'))
         playerBoards[i].appendChild(createElement('faceUpRow'))
         playerBoards[i].appendChild(createElement('faceDownRow' ))
@@ -337,15 +347,17 @@ clearDiscardDisplay =() =>{
 const playCard = (cardInd, source) =>{
     
     displayOnDiscard(currentPlayer[source][cardInd].displayNum, currentPlayer[source][cardInd].suit)
+
     discardPile.push(currentPlayer[source][cardInd])
     currentPlayer[source].splice(cardInd, 1)
     if (gameDeck.length > 0 && currentPlayer.hand.length < 3){
 
     drawCard(playersArr.indexOf(currentPlayer), 'hand','hand')
+
     }
    
 }
-//Displays the position of the players than finished the game inside their boards
+//Displays the position of the players than finished the game insigit git  their boards
 const displayFinalPosition=() =>{
     let positionDisplay =createElement('.finalText', `${currentPlayer.name} Finished game in ${finishedPlayers.length} position`)
     positionDisplay.style.color = 'white'
@@ -471,12 +483,12 @@ const displayMessage = (content) =>{
 defineDeck()
 shuffleDeck(completeDeck)
 
-generatePlayers()
-let currentPlayer = playersArr[0]
+// generatePlayers()
+// let currentPlayer = playersArr[0]
 
-displayPlayerBoards()
+// displayPlayerBoards()
 
-drawInitialCards()
+// drawInitialCards()
 
 
 
@@ -500,6 +512,7 @@ currentBoard.addEventListener('click', function(e){
     //Will excecute a normal turn if we are not currently being asked if we wish to play an extra identical card
     if (askingForMult === false){
         if (isLegalCardPlay(selCard.num , source)){
+            e.target.closest('.card').classList.add('fade-out')
             e.target.closest('.card').remove()
             playCard(cardIndex, source)
             if (source === 'hand'){
@@ -514,12 +527,14 @@ currentBoard.addEventListener('click', function(e){
                     if (selCard.num ===10 ){
                         displayMessage('You played a 10. Play again')
                     } else{
-                        displayMessage('You completed a set in the discard Pile. Play again')
+                        displayMessage('You completed a set in the discard pile. Play again')
                     }
                     discardPile = []
                     //remove cards from display discard pile
                     clearDiscardDisplay()
                     discardCards.textContent = discardPile.length.toString()
+                } else if(selCard.num ===2){
+                    displayMessage('You played a 2. Play again')
                 } else if(gameOver != true){
                     setTimeout(changeCurrentPlayer(1), '2000')
                     while (currentPlayer.done === true){
@@ -635,6 +650,48 @@ playAgainBtn.addEventListener('click', function(){
             messageCont.style.display = 'none'
 })
 
+addPlayer.addEventListener('click', function(){
+    const playerInput = document.createElement('input')
+    playerInput.setAttribute('type', 'text')
+    playerInput.setAttribute('id', `pl${playerList.childElementCount + 1}`)
+    playerInput.setAttribute('placeholder', `Player ${playerList.childElementCount + 1}`)
+    
+    playerList.append(playerInput)
+    if(playerList.childElementCount === 4){
+        addPlayer.remove()
+    }
+})
+
+submitPlayers.addEventListener('click', function(){
+    playerCount = playerList.childElementCount
+    console.log(playerCount)
+    for (let i = 0; i<playerCount; i++){
+        plName = document.getElementById(`pl${i+1}`).value
+        if (plName){
+            playersNames[i] = plName
+        } else {
+            playersNames[i] = `Player ${i+1}`
+        }
+    }
+    welcomeScreen.style.display = 'none'
+    generatePlayers()   
+    currentPlayer = playersArr[0]
+
+    displayPlayerBoards()
+
+    drawInitialCards()
+    tableCenter.style.display = 'flex'
+})
+
+
+rulesButton.addEventListener('click', function(){
+    console.log('clicked')
+    rules.style.display = 'flex'
+})
+
+closeRules.addEventListener('click', function(){
+    rules.style.display = 'none'
+})
 
 
 // let selectedCard =document.querySelector(`.currentPlayer .hand .card:nth-of-type(2)`)

@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="header" > <h1>Game of Tres</h1></div>
+    <div class="header" > <h1>Game of Tres</h1> <button class= 'rulesButton'>?</button></div>
     <div class = 'inactivePlayers'></div>
     <div class = 'tableCenter'>
         <div class = 'deck'>
@@ -46,5 +46,44 @@
 
         </ol>
     </div>
+    <div class = 'welcomeScreen'>
+        <h2>Welcome to the game of Tres</h2>
+        <h4>Who's playing</h4>
+        <div class = 'playerList'>
+            <input type="text" placeholder="Player 1" id="pl1" >
+            <input type="text" placeholder="Player 2" id="pl2" >
+        </div>
+        <button class="addPlayer">Add Player</button>
+        <button class = 'submitPlayers'>Submit</button>
+    </div>
+    <div class= 'rules'>
+        <button class = closeRules>x</button>
+        <h2>
+          Rules of the game 
+        </h2> 
+        <p class="rulesText" >
+
+            -The objective of the game is to run out of cards as soon as possible<br/>
+            -Each player starts the game with 3 cards face down, 3 cards face up and 3 cards in hand<br/>
+            -In a turn, the active player has to play a card on top of discard pile if possible<br/>
+            -Rules for playing a card are:<br/>
+            - if there are no cards in discard. you can play any card<br/>
+            - Otherwise play a card that has a higher value than the card on top of the discard pile (highest card for this game is A)<br/>
+            
+            ----after playing a card, if you have fewer than 3 cards in your hand AND there are cards left on the deck, draw a card<br/>
+            -If you can't play a card, you'll collect the discard pile into your hand, the previous player gets to go again<br/>
+            -you can only play cards from the table face up when your hand is empty<br/>
+            -you can only play face down cards when you don't have any face up cards left nor cards in your hand<br/>
+            ---playing facedown cards is always a gamble, you don't get to see them before choosing which one to play. if it's not a valid move, add it to you hand, collect the discard and previous player gets to go again<br/>
+            Special situations:
+            - 2 can be played regardless of the number on top of discard. Then play another card<br/>
+            - 10 can be played regardles of the number on top of discard AND it will get rid of current discard pile (trashed). Then play a another card<br/>
+            - if the top of the discard pile has 3 continuous cards of the same value, the discard pile gets trashed and current player gets another turn.<br/>
+            
+            Players will be ranked in the order of which they got rid of all the cards
+            
+        </p>
+    </div>
+
 </body>
 </html>
