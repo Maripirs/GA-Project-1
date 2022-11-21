@@ -12,6 +12,9 @@ let askingForMult = false
 let dupCheck = null
 let playAgain = null
 let currentPlayer = null
+let topDiscard = 0
+let emptyCard = null
+let extraTurn = false
 
 ////HTML ELEMENTS
 const tableCenter = document.querySelector('.tableCenter')
@@ -193,7 +196,7 @@ const setUp =() =>{
 }
 
 
-//Creates the divs elements for the card and contents of the cars, then appends it to the player and class targeted
+//Creates the divs elements for the card and contents of the cards, then appends it to the player and class targeted
 const displayCard = (playerInd, className, orientation = faceUp, displayNum, suit) =>{
 
     let card = createElement(`card ${orientation}`)
@@ -213,6 +216,7 @@ const displayCard = (playerInd, className, orientation = faceUp, displayNum, sui
 
 
 }
+
 //cycles through the players according to the direction (forwards or backwards)
 const changeCurrentPlayer =(direction) =>{
     let prevPlayerInd = playersArr.indexOf(currentPlayer)
@@ -242,8 +246,9 @@ const displayCurrentPlayer = (prevPlayerInd) =>{
     currentBoard.replaceChild(playerBoards[currentPlayerInd], playerBoards[prevPlayerInd])
 }
 
+
+//compares selected card with top of discard to see if can be played
 const compareCardValue =(selectedCardValue) =>{
-    let topDiscard = discardPile[discardPile.length-1]
         if (discardPile.length === 0){
             return true
         } else if (selectedCardValue >= topDiscard.num){
@@ -279,14 +284,16 @@ const isLegalCardPlay = (selectedCardValue, source) =>{
     }
 }
 
+
+//Will check if the player has any cards that are a legal play (in case the player hit the pass button)
 const canPlayCard = () => {
     if (discardPile.length ===0){
         return true
     }
     //if player has cards in hand that can be played, return true.
     if (currentPlayer.hand.length != 0) {
-        for (let i = 0; i >currentPlayer.hand.length; i++){
-            if (isLegalCardPlay(currentPlayer.hand[i], 'hand') === true) {
+        for (let i = 0; i < currentPlayer.hand.length; i++){
+            if (isLegalCardPlay(currentPlayer.hand[i].num, 'hand') === true) {
                 return true
             } 
         } 
@@ -335,8 +342,8 @@ const determineCardIndex =(chosenDisplayNum, chosenSuit, source) =>{
     }
 }
 
-//should set the discards visibility to invisible. not working
-clearDiscardDisplay =() =>{
+//Sets visibility of contents of discard pile invisible
+const clearDiscardDisplay =() =>{
     document.querySelector('.discardPile .cardNum').style.visibility = 'hidden' 
     document.querySelector('.discardPile .suit').style.visibility = 'hidden' 
 }
@@ -354,8 +361,19 @@ const playCard = (cardInd, source) =>{
     currentPlayer[source].splice(cardInd, 1)
     if (gameDeck.length > 0 && currentPlayer.hand.length < 3){
 
-    drawCard(playersArr.indexOf(currentPlayer), 'hand','hand')
+    }
+   
+}
+const playCardfromHand = (cardInd, e) =>{
+    e.target.closest('.card').remove()
+    
+    displayOnDiscard(currentPlayer.hand[cardInd].displayNum, currentPlayer.hand[cardInd].suit)
 
+    discardPile.push(currentPlayer.hand[cardInd])
+    currentPlayer.hand.splice(cardInd, 1)
+    if (gameDeck.length > 0 && currentPlayer.hand.length < 3){
+
+    drawCard(playersArr.indexOf(currentPlayer), 'hand','hand')
     }
    
 }
@@ -369,6 +387,7 @@ const displayFinalPosition=() =>{
 }
 
 
+//Will look for a card in the player hand that has the same value as the card just played
 const doubleCardInd = (selectedCardNum) =>{
     for (let i = 0; i < currentPlayer.hand.length;i++ ){
         if (currentPlayer.hand[i].num === selectedCardNum){
@@ -377,29 +396,6 @@ const doubleCardInd = (selectedCardNum) =>{
     }
 }
 
-//checks if the player can play. if they can, they're not allowed to pass
-//if they can pass. they'll add the discard to their hand both in array and display
-//previous player goes again
-const passAttempt = () =>{
-    if (canPlayCard()){
-
-        displayMessage(`Please pick a card`)
-    }else{
-        currentPlayer.hand.push(...discardPile)
-        let playerInd = playersArr.indexOf(currentPlayer) 
-        discardPile.forEach((card) =>{
-            displayCard(playerInd, 'hand', 'hand', card.displayNum, card.suit)
-        })
-        discardPile = []
-        clearDiscardDisplay()
-        changeCurrentPlayer(-1)
-        while (currentPlayer.done === true){
-            changeCurrentPlayer(-1)
-        }
-        discardCards.textContent = discardPile.length.toString()
-        console.log('pass')
-    }
-}
 
 
 //Just for testing / demo
@@ -415,11 +411,9 @@ const findIndex = (e) =>{
     let selectedCard = e.target.closest('.card')
     let source = e.target.closest('.card').parentNode
     let cardsInSource = source.childNodes
-    console.log(cardsInSource)
-    console.log(selectedCard)
+    
     for (let i = 0; i < cardsInSource.length; i++){
         if (selectedCard === cardsInSource[i]){
-            console.log(i)
             return i
         } 
     }
@@ -428,7 +422,6 @@ const findIndex = (e) =>{
 // When a player finishes the game, it will add them to the list of dinished players and check if the game is over
 const removeFromGame =() =>{
     finishedPlayers.push(currentPlayer)
-    console.log(playersArr)
     displayFinalPosition()
     let positionLi = createElement('positionLi', `${currentPlayer.name}`, 'li')
     positions.append(positionLi)
@@ -440,7 +433,6 @@ const removeFromGame =() =>{
 
 // recursive function looking if the player has more cards of the same value
 const checkForMultiples =(selCardNum, selCardDisplayNum) =>{
-    console.log(selCardNum, 'checking for multiples')
     if (doubleCardInd(selCardNum) != null ){
         console.log('found a dup')
         dupCheck = selCardNum 
@@ -448,22 +440,7 @@ const checkForMultiples =(selCardNum, selCardDisplayNum) =>{
         messageCont.style.display = 'flex'
         message.textContent = `You have another ${selCardDisplayNum}. Select it if you wish to play it`
         playAgainBtn.style.display = 'flex'
-
-
-        // let playAgain = prompt(`You have another ${selCardDisplayNum}. Do you want to play it? y/n`)
-        // while (playAgain != 'y' && playAgain != 'n'){
-        //     playAgain = prompt(`You have another ${selCardDisplayNum}. Do you want to play it? y/n`)
-        
-        // }
-        // if (playAgain === 'y'){
-        //     console.log('playagain')
-        //     let dupCardInd = doubleCardInd(selCardNum)
-        //     console.log(dupCardInd)
-        //     playCard(dupCardInd, 'hand',selCardNum, currentPlayer.hand[dupCardInd].suit , selCardDisplayNum)
-        //     dupCard = document.querySelector(`.currentPlayer .hand .card:nth-of-type(${dupCardInd+1})`)
-        //     console.log(dupCard, 'dupCard')
-        //     dupCard.remove()
-        // }
+        extraTurn = true
     }else {
         askingForMult = false
     }
@@ -482,17 +459,132 @@ const displayMessage = (content) =>{
     }, 4000)
 }
 
-defineDeck()
-shuffleDeck(completeDeck)
 
-// generatePlayers()
-// let currentPlayer = playersArr[0]
+const startGame =() =>{
+    welcomeScreen.style.display = 'none'
+    defineDeck()
+    shuffleDeck(completeDeck)
+    generatePlayers()   
+    currentPlayer = playersArr[0]
+    displayPlayerBoards()
+    drawInitialCards()
+    tableCenter.style.display = 'flex'
+    emptyCard = new Card('none', 0, '0')
+}
 
-// displayPlayerBoards()
+const endTurn=(selCard) =>{
+    //check if player has cards left
+    currentPlayer.doneWithGame()
+    if (currentPlayer.done){
+        removeFromGame()
+        extraTurn = false
+    }
+    
+    if (checkForSet()){
+        displayMessage('You completed a set in the discard Pile. Play again')
+        discardPile = []
+        clearDiscardDisplay()
+        discardCards.textContent = discardPile.length.toString()
+        extraTurn= true
+        if (currentPlayer.done){
+            extraTurn = false
+        }
+    }
+    
+    if (selCard.num ===10){
+        discardPile = []
+        clearDiscardDisplay()
+        discardCards.textContent = discardPile.length.toString()
+    }
+    
+    if(gameOver != true && discardPile[discardPile.length-1].num != 2 && discardPile[discardPile.length-1] !=10){
+        
+    }
+    askingForMult = false
+    messageCont.style.display = 'none'
+}
+const legalTurn =(e, selCard, cardIndex, source) =>{
+    
+    if(selCard.num === 2){
+        playCardfromHand(cardIndex, e)
+        displayMessage('You played a 2. Play again')
+        extraTurn = true
+    } else if (selCard.num === 10 ){
+        playCardfromHand(cardIndex, e)
+        displayMessage('You played a 10. Play again')
+        extraTurn = true
+    }else if(selCard.num >= topDiscard.num){
+        playCardfromHand(cardIndex, e)
+        extraTurn = false
+    }  
+}
 
-// drawInitialCards()
+//checks if the player can play. if they can, they're not allowed to pass
+//if they can pass. they'll add the discard to their hand both in array and display
+//previous player goes again
+const passAttempt = () =>{
+    // set top of discard pile as the last element of the array or an empty card object
+    if(discardPile.length === 0){
+        topDiscard = emptyCard
+    } else {
+        topDiscard = discardPile[discardPile.length-1]
+    }
+
+    if (canPlayCard()){
+
+        displayMessage(`Please pick a card`)
+    }else{
+        currentPlayer.hand.push(...discardPile)
+        let playerInd = playersArr.indexOf(currentPlayer) 
+        discardPile.forEach((card) =>{
+            displayCard(playerInd, 'hand', 'hand', card.displayNum, card.suit)
+        })
+        discardPile = []
+        clearDiscardDisplay()
+        changeCurrentPlayer(-1)
+        while (currentPlayer.done === true){
+            changeCurrentPlayer(-1)
+        }
+        discardCards.textContent = discardPile.length.toString()
+
+    }
+}
+
+const clickedFromHand = (e, selCard, cardIndex) =>{
+    //Will excecute a normal turn if we are not currently being asked if we wish to play an extra identical card
+    if (askingForMult === false || selCard.num === topDiscard.num){
+        //is legal play
+        if(compareCardValue(selCard.num)){
+            legalTurn(e, selCard, cardIndex, 'hand')
+            checkForMultiples(selCard.num, selCard.displayNum)
+            extraTurn = askingForMult
+            if (extraTurn===false){
+                if(gameOver != true){
+                    endTurn(selCard)
+                    changeCurrentPlayer(1)
+                    while (currentPlayer.done === true){
+                        changeCurrentPlayer(1)
+                    }
+                    messageCont.style.display = 'none'
+                }
+            }
+        //illegal
+        }else {
+            displayMessage(`${selCard.num} has a lower value than ${topDiscard.displayNum}. Pick a different card `)
+        }
+    } 
+}
 
 
+
+const clickedFromFaceUp = (e, selCard, cardIndex) =>{
+ 
+}
+
+const clickedFromFaceDown = (e, selCard, cardIndex) =>{
+
+
+}
 
 /*
 Event Listeners past this line
@@ -506,11 +598,29 @@ passBtn.addEventListener('click', passAttempt)
 
 //main function
 currentBoard.addEventListener('click', function(e){
+    // set top of discard pile as the last element of the array or an empty card object
+    if(discardPile.length === 0){
+        topDiscard = emptyCard
+    } else {
+        topDiscard = discardPile[discardPile.length-1]
+    }
+
     let cardIndex = findIndex(e)
     let source = e.target.closest('div').className.split(' ')[1]
     let selCard = currentPlayer[source][cardIndex]
 
 
+    if (source === 'hand'){
+        clickedFromHand(e, selCard, cardIndex)
+    }
+    if (source === 'faceUpRow'){
+        clickedFromFaceUp(e, selCard, cardIndex)
+    }
+    if (source === 'faceDownRow'){
+        clickedFromFaceDown(e, selCard, cardIndex)
+    }
+})
+    /*
     //Will excecute a normal turn if we are not currently being asked if we wish to play an extra identical card
     if (askingForMult === false){
         if (isLegalCardPlay(selCard.num , source)){
@@ -538,7 +648,7 @@ currentBoard.addEventListener('click', function(e){
                 } else if(selCard.num ===2){
                     displayMessage('You played a 2. Play again')
                 } else if(gameOver != true){
-                    setTimeout(changeCurrentPlayer(1), '2000')
+                    changeCurrentPlayer(1)
                     while (currentPlayer.done === true){
                         changeCurrentPlayer(1)
                     }
@@ -573,7 +683,6 @@ currentBoard.addEventListener('click', function(e){
         playCard(cardIndex, source)
         e.target.closest('.card').remove()
         checkForMultiples(selCardNum, selCardDisplayNum)
-        console.log(askingForMult)
         if (askingForMult=== false){
             currentPlayer.doneWithGame()
                 if (currentPlayer.done){
@@ -599,8 +708,8 @@ currentBoard.addEventListener('click', function(e){
                 discardCards.textContent = discardPile.length.toString()
         }
     }
-        
-    })
+*/
+
 
 ///Just for testing
 almostOver.addEventListener('click', function(){
@@ -642,7 +751,7 @@ playAgainBtn.addEventListener('click', function(){
             
             discardCards.textContent = discardPile.length.toString()
             
-            if(gameOver != true){
+            if(gameOver != true && discardPile[discardPile.length-1].num != 2 && discardPile[discardPile.length-1] !=10){
                 changeCurrentPlayer(1)
                 while (currentPlayer.done === true){
                     changeCurrentPlayer(1)
@@ -675,7 +784,6 @@ removePlayer.addEventListener('click', function(){
 
 submitPlayers.addEventListener('click', function(){
     playerCount = playerList.childElementCount
-    console.log(playerCount)
     for (let i = 0; i<playerCount; i++){
         plName = document.getElementById(`pl${i+1}`).value
         if (plName){
@@ -684,19 +792,11 @@ submitPlayers.addEventListener('click', function(){
             playersNames[i] = `Player ${i+1}`
         }
     }
-    welcomeScreen.style.display = 'none'
-    generatePlayers()   
-    currentPlayer = playersArr[0]
-
-    displayPlayerBoards()
-
-    drawInitialCards()
-    tableCenter.style.display = 'flex'
+    startGame()
 })
 
 
 rulesButton.addEventListener('click', function(){
-    console.log('clicked')
     rules.style.display = 'flex'
 })
 
