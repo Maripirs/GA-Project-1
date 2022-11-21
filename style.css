@@ -211,7 +211,7 @@ button{
     display: none;
 }
 .rulesText{
-    font-size : 80%;
+    font-size: 1vmin;
     margin: 5vmin;
 }
 h2{
@@ -253,11 +253,11 @@ input{
 }
 .rulesButton{
     position: absolute;
-    right: 7vw;
+    right: 7%;
 }
 .closeRules{
     position: absolute;
-    right: 7vw;
+    right: 7%;
     top: 2vh
 }
 

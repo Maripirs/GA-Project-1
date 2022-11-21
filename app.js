@@ -183,7 +183,6 @@ const drawInitialCards =() =>{
         }
     }
     deckCards.textContent = (gameDeck.length).toString()
-
 }
 
 // shuffles the deck and then draws starting cards
