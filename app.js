@@ -10,7 +10,6 @@ let playerCount = 4
 let gameOver = false
 let askingForMult = false
 let dupCheck = null
-let playAgain = null
 let currentPlayer = null
 
 ////HTML ELEMENTS
@@ -187,6 +186,7 @@ const drawInitialCards =() =>{
 
 // shuffles the deck and then draws starting cards
 const setUp =() =>{
+    defineDeck()
     gameDeck = shuffleDeck(completeDeck)
     drawInitialCards()
 }
@@ -241,6 +241,8 @@ const displayCurrentPlayer = (prevPlayerInd) =>{
     currentBoard.replaceChild(playerBoards[currentPlayerInd], playerBoards[prevPlayerInd])
 }
 
+
+// checks if the value of the card is a legal placement
 const compareCardValue =(selectedCardValue) =>{
     let topDiscard = discardPile[discardPile.length-1]
         if (discardPile.length === 0){
@@ -278,6 +280,7 @@ const isLegalCardPlay = (selectedCardValue, source) =>{
     }
 }
 
+//checks if the player can play a card by looping through their current options and comparing their values to discard
 const canPlayCard = () => {
     if (discardPile.length ===0){
         return true
@@ -367,7 +370,7 @@ const displayFinalPosition=() =>{
     middleRow.append(positionDisplay)
 }
 
-
+//loops throgh cards in hand looking for a card that matches the value of the card just played
 const doubleCardInd = (selectedCardNum) =>{
     for (let i = 0; i < currentPlayer.hand.length;i++ ){
         if (currentPlayer.hand[i].num === selectedCardNum){
@@ -481,15 +484,8 @@ const displayMessage = (content) =>{
     }, 4000)
 }
 
-defineDeck()
-shuffleDeck(completeDeck)
 
-// generatePlayers()
-// let currentPlayer = playersArr[0]
 
-// displayPlayerBoards()
-
-// drawInitialCards()
 
 
 
@@ -623,10 +619,9 @@ almostOver.addEventListener('click', function(){
     deckCards.textContent = (gameDeck.length).toString()
 })
 
-//To continue without playing dups
 
+//To continue without playing dups
 playAgainBtn.addEventListener('click', function(){
-    playAgain = false
     currentPlayer.doneWithGame()
             if (currentPlayer.done){
                 removeFromGame()
@@ -651,6 +646,8 @@ playAgainBtn.addEventListener('click', function(){
             messageCont.style.display = 'none'
 })
 
+
+//When asking for player names button to add another input
 addPlayer.addEventListener('click', function(){
     const playerInput = document.createElement('input')
     playerInput.setAttribute('type', 'text')
@@ -664,7 +661,7 @@ addPlayer.addEventListener('click', function(){
     }
 })
 
-
+//When asking for player names button to remove an input
 removePlayer.addEventListener('click', function(){
     playerList.lastChild.remove()
     if (playerList.childElementCount === 2){
@@ -672,6 +669,7 @@ removePlayer.addEventListener('click', function(){
     }
 })
 
+//collects the information from the player names / amount of players
 submitPlayers.addEventListener('click', function(){
     playerCount = playerList.childElementCount
     console.log(playerCount)
@@ -693,12 +691,13 @@ submitPlayers.addEventListener('click', function(){
     tableCenter.style.display = 'flex'
 })
 
-
+//display rules
 rulesButton.addEventListener('click', function(){
     console.log('clicked')
     rules.style.display = 'flex'
 })
 
+//close rules
 closeRules.addEventListener('click', function(){
     rules.style.display = 'none'
 })
