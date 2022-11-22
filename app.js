@@ -124,7 +124,7 @@ const generatePlayers =() => {
     }
 }
 
-//Generic methot to create an element(default DIV) and add conntent to it.
+//Generic function to create an element(default DIV) and add conntent to it.
 const createElement =(className, content, tag = 'div') =>{
     const newDiv = document.createElement(`${tag}`)
     newDiv.className = className;
