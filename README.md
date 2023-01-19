@@ -1,7 +1,6 @@
-# GA-Project-1
-Game of Tres
+#Game of Tres
 
-https://maripirs.github.io/GA-Project-1/
+[Live Site](https://maripirs.github.io/Game-of-Tres/)
 
 ## Index
 - [Scope](#Scope)
